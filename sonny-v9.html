@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Сонни</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F2F8;--card:#FFF;--ink:#34304A;--muted:#8B86A3;--line:#E8E4F1;
+  --accent:#F0926E;--as:#FCE8DF;--night:#2B2546;--n2:#3A3260;
+  --star:#F6C98B;--mint:#7FC9AE;--ms:#E2F4EC;--rose:#E58BA0;
+  --warn:#FBE9ED;--wi:#9A5063;--tip:#FFF6EE;--ti:#9A6B3C;
+  --r:20px;--sh:0 6px 24px rgba(52,48,74,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:linear-gradient(180deg,#EDE9F5 0%,#F7F4EE 100%);font-family:'Rubik',sans-serif;color:var(--ink);display:flex;justify-content:center}
+.phone{width:100%;max-width:430px;min-height:100vh;background:var(--bg);display:flex;flex-direction:column;position:relative;overflow:hidden}
+/* TOPBAR */
+.topbar{padding:16px 18px 8px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Comfortaa',sans-serif;font-weight:700;font-size:19px;color:var(--ink)}
+.logo .m{color:var(--accent)}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 13px;font-size:12.5px;color:var(--muted);box-shadow:var(--sh);cursor:pointer}
+.chip b{color:var(--ink);font-weight:600}
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:4px 14px 90px}
+.tab{display:none}.tab.active{display:block;animation:fade .22s ease}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:16px;margin-bottom:12px;border:1px solid var(--line)}
+h2{font-size:14.5px;font-weight:600;margin-bottom:8px}
+.sub{font-size:12.5px;color:var(--muted);line-height:1.5}
+/* STATE */
+.state{position:relative;border-radius:22px;padding:20px 18px;margin-bottom:12px;background:linear-gradient(150deg,#FFF6EE,#FDEBE0);border:1px solid #F6DCCB;box-shadow:var(--sh)}
+.state .lbl{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:#C2876B;font-weight:600}
+.bigtime{font-family:'Comfortaa',sans-serif;font-weight:700;font-size:42px;margin:5px 0 2px;color:var(--ink)}
+.state .hint{font-size:13px;color:#7A6A60;line-height:1.5}
+.winrow{display:flex;gap:8px;margin-top:12px}
+.wp{flex:1;background:rgba(255,255,255,.75);border-radius:13px;padding:9px 11px}
+.wp .wt{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.wp .wv{font-family:'Comfortaa',sans-serif;font-weight:700;font-size:18px;margin-top:2px}
+.state.asleep{background:radial-gradient(120% 140% at 80% -10%,#4A4178,var(--n2) 35%,var(--night) 100%);border-color:#3A3260}
+.state.asleep .lbl{color:#B7AEE0}.state.asleep .bigtime{color:#FFF}.state.asleep .hint{color:#C9C2E6}
+.state.asleep .wp{background:rgba(255,255,255,.08)}.state.asleep .wv{color:var(--star)}.state.asleep .wt{color:#9D94C6}
+.state.nightsl{background:radial-gradient(120% 140% at 50% -10%,#1a1535,#0d0b1e 100%);border-color:#0d0b1e}
+.state.nightsl .lbl{color:#7B6ECC}.state.nightsl .bigtime,.state.nightsl .hint{color:#C9C2E6}
+.state.nightsl .wp{background:rgba(255,255,255,.06)}.state.nightsl .wv{color:var(--star)}.state.nightsl .wt{color:#7B6ECC}
+.stars{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:22px;opacity:0;transition:opacity .8s}
+.state.asleep .stars,.state.nightsl .stars{opacity:1}
+.stars i{position:absolute;width:3px;height:3px;border-radius:50%;background:var(--star);animation:tw 2.6s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+/* BUTTONS */
+.btn{display:block;width:100%;border:none;border-radius:15px;padding:14px;font-size:15px;font-weight:600;font-family:'Rubik',sans-serif;cursor:pointer;transition:transform .08s;text-align:center;line-height:1.3}
+.btn:active{transform:scale(.982)}
+.btn-s{background:var(--ink);color:#fff;box-shadow:0 7px 20px rgba(52,48,74,.28)}
+.btn-w{background:var(--star);color:#3A2E12;box-shadow:0 7px 20px rgba(246,201,139,.45)}
+.btn-m{background:var(--accent);color:#fff;box-shadow:0 7px 20px rgba(240,146,110,.35)}
+.btn-g{background:transparent;color:var(--muted);font-size:13px;padding:9px}
+.btn+.btn{margin-top:7px}
+/* FEED */
+.fi{display:flex;align-items:flex-start;gap:9px;padding:9px 2px;border-bottom:1px dashed var(--line)}
+.fi:last-child{border-bottom:none}
+.ficon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;margin-top:1px}
+.fi-d{background:#EDEAF8}.fi-w{background:var(--as)}.fi-n{background:#1a1535}
+.fmain{flex:1;min-width:0}
+.ft{font-weight:500;font-size:13.5px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.fs{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4}
+.fcmt{font-size:11px;color:var(--muted);margin-top:2px;font-style:italic}
+.fbadge{font-size:14px;display:flex;gap:2px;flex-shrink:0;padding-top:2px}
+.tag{font-size:10px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:2px 6px;color:var(--muted);white-space:nowrap}
+.tag.warn{background:var(--warn);border-color:#f0b8c0;color:var(--wi)}
+.tag.ok{background:var(--ms);border-color:#a8dcc5;color:#2E6B4C}
+.totals{display:flex;gap:8px;margin-top:10px}
+.tp{flex:1;background:var(--bg);border-radius:13px;padding:9px 10px;text-align:center}
+.tp .tv{font-family:'Comfortaa',sans-serif;font-weight:700;font-size:15px}
+.tp .tt{font-size:10px;color:var(--muted);margin-top:2px}
+.ok{color:var(--mint)}.warn{color:var(--rose)}.tip-c{color:#C89040}
+/* NOTICES */
+.notice{border-radius:13px;padding:10px 13px;font-size:12.5px;line-height:1.5;margin-top:8px}
+.notice.info{background:var(--ms);color:#3E6E5C}
+.notice.alert{background:var(--warn);color:var(--wi)}
+.notice.tip{background:var(--tip);color:var(--ti);border:1px solid #F6DCCB}
+.notice.praise{background:linear-gradient(135deg,#FFF6EE,#FCE8DF);color:#8B5E3C;border:1px solid #F6DCCB}
+/* CALIB */
+.calib-box{border-radius:14px;padding:13px;margin-top:9px;background:linear-gradient(135deg,#F0EBF8,#EDE8F5);border:1px solid #D9D4ED}
+.calib-title{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.calib-row{display:flex;align-items:flex-start;gap:7px;margin-bottom:5px;font-size:12px;line-height:1.4}
+.calib-ico{font-size:14px;flex-shrink:0;margin-top:1px}
+.calib-act{color:#7B5EA7;font-weight:600}
+/* REGRESSION */
+.reg-badge{display:flex;align-items:flex-start;gap:9px;background:linear-gradient(135deg,#FFF0F5,#FFE4EE);border:1px solid #F4B8CC;border-radius:14px;padding:13px;margin-top:9px}
+.rb-icon{font-size:22px;flex-shrink:0}
+.rb-title{font-size:12.5px;font-weight:600;color:#8B1A3C;margin-bottom:3px}
+.rb-text{font-size:12px;color:#6B3050;line-height:1.5}
+.rb-actions{margin-top:7px;display:flex;flex-wrap:wrap;gap:5px}
+.rb-chip{font-size:11px;background:rgba(255,255,255,.7);border:1px solid #F4B8CC;border-radius:999px;padding:3px 9px;color:#8B1A3C}
+/* END-OF-DAY SUMMARY */
+.eod-card{background:linear-gradient(135deg,#2B2546,#3A3260);border-radius:20px;padding:18px;margin-bottom:12px;color:#fff}
+.eod-title{font-size:13px;font-weight:600;color:var(--star);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.eod-text{font-size:13px;line-height:1.6;color:#C9C2E6;margin-bottom:14px}
+.eod-actions{display:flex;gap:8px}
+.eod-btn{flex:1;border:none;border-radius:12px;padding:11px 8px;font-size:13px;font-weight:600;font-family:'Rubik',sans-serif;cursor:pointer}
+.eod-yes{background:var(--mint);color:#1A4A35}
+.eod-no{background:rgba(255,255,255,.15);color:#C9C2E6}
+/* PLACE PILLS */
+.place-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+.pp{border:1.5px solid var(--line);border-radius:999px;padding:6px 10px;font-size:11.5px;cursor:pointer;background:var(--bg);color:var(--muted);transition:all .15s}
+.pp.sel{border-color:var(--accent);background:var(--as);color:var(--ink);font-weight:600}
+.comment-area{width:100%;border:1px solid var(--line);border-radius:13px;padding:10px 12px;font-size:13.5px;font-family:'Rubik';background:var(--bg);color:var(--ink);outline:none;resize:none;margin-top:7px;min-height:52px}
+.comment-area:focus{border-color:var(--accent)}
+/* MOOD */
+.mood3{display:flex;gap:7px}
+.m3{flex:1;border:2px solid var(--line);border-radius:14px;padding:10px 5px;text-align:center;cursor:pointer;background:var(--bg);transition:all .15s}
+.m3 .me{font-size:23px}.m3 .ml{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.3}
+.m3.sb{border-color:var(--rose);background:#FBE9ED}
+.m3.so{border-color:#C8B96A;background:#FFF9E6}
+.m3.sg{border-color:var(--mint);background:var(--ms)}
+.mhint{font-size:12px;color:var(--muted);margin-top:7px;padding:8px 11px;background:var(--bg);border-radius:10px;line-height:1.5;display:none}
+.mhint.show{display:block}
+/* OVERLAYS */
+.overlay{position:fixed;inset:0;background:rgba(43,37,70,.45);display:none;align-items:flex-end;justify-content:center;z-index:50;backdrop-filter:blur(3px)}
+.overlay.show{display:flex}
+.sheet{background:var(--card);width:100%;max-width:430px;border-radius:22px 22px 0 0;padding:20px 18px 26px;animation:up .22s ease;max-height:93vh;overflow-y:auto}
+@keyframes up{from{transform:translateY(38px);opacity:0}to{transform:none;opacity:1}}
+.sheet h3{font-size:16px;font-weight:600;margin-bottom:5px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:5px}
+.field input,.field select{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:15px;font-family:'Rubik';background:var(--bg);color:var(--ink);outline:none}
+/* HISTORY TAB */
+.hist-day{margin-bottom:16px}
+.hist-date{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:8px}
+.hist-date::after{content:'';flex:1;height:1px;background:var(--line)}
+.hist-stat{display:flex;gap:6px;margin-bottom:8px}
+.hsp{flex:1;background:var(--bg);border-radius:11px;padding:8px 9px;text-align:center}
+.hsp .hv{font-family:'Comfortaa',sans-serif;font-weight:700;font-size:14px}
+.hsp .ht{font-size:10px;color:var(--muted);margin-top:1px}
+.hist-item{display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line);font-size:12.5px}
+.hist-item:last-child{border-bottom:none}
+.edit-link{font-size:11px;color:var(--accent);cursor:pointer;margin-left:auto;flex-shrink:0}
+/* EDIT LOG OVERLAY */
+.edit-field-row{display:flex;gap:8px;margin-bottom:10px}
+.edit-field-row .field{flex:1;margin-bottom:0}
+/* PLAN TAB */
+.plan-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.plan-row:last-child{border-bottom:none}
+.plan-time{font-family:'Comfortaa',sans-serif;font-weight:700;font-size:13.5px;width:46px;flex-shrink:0}
+.plan-bar{height:8px;border-radius:5px;flex:1}
+.pb-w{background:linear-gradient(90deg,#FCD9B8,#F8C49A)}
+.pb-s{background:linear-gradient(90deg,#B9AEE6,#9D8FD8)}
+.pb-n{background:linear-gradient(90deg,#564B8C,#2B2546)}
+.plan-lab{font-size:11.5px;color:var(--muted);width:105px;flex-shrink:0;text-align:right}
+.normtable{width:100%;border-collapse:collapse;font-size:12px;margin-top:5px}
+.normtable td{padding:6px 3px;border-bottom:1px dashed var(--line)}
+.normtable td:last-child{text-align:right;font-weight:500}
+/* ARCH BOX */
+.arch-card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--line);overflow:hidden;margin-bottom:12px}
+.arch-hdr{background:linear-gradient(135deg,#F0EBF8,#EDE8F5);padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:9px}
+.arch-hdr h2{margin:0;font-size:14px}
+.arch-hdr .arr{margin-left:auto;font-size:10px;color:var(--muted);transition:transform .2s}
+.arch-hdr.open .arr{transform:rotate(180deg)}
+.arch-body{display:none;padding:14px 16px}
+.arch-body.show{display:block}
+.arch-age{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:11px 0 5px}
+.arch-age:first-child{margin-top:0}
+.arch-row{display:flex;gap:8px;margin-bottom:6px;font-size:12px;line-height:1.5;align-items:flex-start}
+.arch-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:5px}
+/* CHAT */
+.chatwrap{display:flex;flex-direction:column;height:calc(100vh - 165px);min-height:380px}
+.chatlog{flex:1;overflow-y:auto;padding:4px 1px 8px;display:flex;flex-direction:column;gap:9px}
+.msg{max-width:87%;padding:10px 13px;border-radius:17px;font-size:13.5px;line-height:1.55;white-space:pre-wrap;word-wrap:break-word}
+.msg.user{align-self:flex-end;background:var(--ink);color:#fff;border-bottom-right-radius:4px}
+.msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:4px;box-shadow:var(--sh)}
+.msg.typing{color:var(--muted);font-style:italic}
+.chips{display:flex;gap:6px;flex-wrap:wrap;padding:6px 0}
+.chip2{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:12px;cursor:pointer;box-shadow:var(--sh)}
+.chatbar{display:flex;gap:7px;padding:7px 0 3px}
+.chatbar input{flex:1;border:1px solid var(--line);border-radius:14px;padding:11px 13px;font-size:13.5px;font-family:'Rubik';background:var(--card);color:var(--ink);outline:none}
+.chatbar input:focus{border-color:var(--accent)}
+.sendbtn{width:44px;height:44px;border-radius:13px;border:none;background:var(--accent);color:#fff;font-size:18px;cursor:pointer;flex-shrink:0}
+/* ONBOARD */
+.onboard{position:absolute;inset:0;background:var(--bg);z-index:60;display:flex;flex-direction:column;justify-content:center;padding:26px;text-align:center;overflow-y:auto}
+.onboard .mb{font-size:58px;margin-bottom:9px}
+.onboard h1{font-family:'Comfortaa';font-size:24px;margin-bottom:7px}
+.onboard p{color:var(--muted);font-size:13.5px;line-height:1.6;margin-bottom:20px}
+.onboard .field{text-align:left}
+.preterm-q{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.ptb{flex:1;min-width:85px;border:2px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;background:var(--bg);font-size:12.5px;font-family:'Rubik';color:var(--ink);transition:all .15s}
+.ptb.sel{border-color:var(--accent);background:var(--as);font-weight:600}
+.hidden{display:none!important}
+/* HOW */
+.how-wrap{margin-bottom:11px}
+.how-toggle{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;cursor:pointer;box-shadow:var(--sh);font-size:12.5px;font-weight:500;color:var(--ink)}
+.how-toggle .arr{margin-left:auto;font-size:10px;color:var(--muted);transition:transform .2s}
+.how-toggle.open .arr{transform:rotate(180deg)}
+.how-body{display:none;background:var(--card);border:1px solid var(--line);border-radius:0 0 14px 14px;margin-top:-5px;padding:12px 14px 14px;border-top:1px dashed var(--line)}
+.how-body.show{display:block}
+.how-step{display:flex;gap:8px;margin-bottom:8px;font-size:12px;line-height:1.5;align-items:flex-start}
+.how-step:last-child{margin-bottom:0}
+.how-num{width:19px;height:19px;border-radius:50%;background:var(--accent);color:#fff;font-size:10.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+/* TABBAR */
+.tabbar{position:absolute;bottom:0;left:0;right:0;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;padding:6px 6px 15px;z-index:20}
+.tabbtn{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;color:var(--muted);font-family:'Rubik';font-size:10px;padding:5px 0;border-radius:12px}
+.tabbtn .ti{font-size:19px;line-height:1}
+.tabbtn.active{color:var(--ink)}
+.tabbtn.active::after{content:'';width:4px;height:4px;border-radius:50%;background:var(--accent);margin-top:1px}
+/* HIST WB */
+.hist-wb{font-size:11px;color:var(--muted);padding:3px 6px;margin:2px 0;display:flex;align-items:center;gap:5px;background:var(--bg);border-radius:7px}
+/* ARCH BTN */
+.arch-btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.arch-btn{flex:1;min-width:130px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:11px 10px;cursor:pointer;text-align:left;box-shadow:var(--sh)}
+.arch-btn .ab-ico{font-size:20px;margin-bottom:5px}
+.arch-btn .ab-title{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.arch-btn .ab-sub{font-size:11px;color:var(--muted);line-height:1.4}
+/* ARCH DETAIL */
+.arch-detail{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;display:none}
+.arch-detail.show{display:block}
+.arch-detail h3{font-size:13.5px;font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.arch-formula{background:linear-gradient(135deg,#F0EBF8,#EDE8F5);border-radius:12px;padding:12px;margin-bottom:10px;font-size:13px;font-weight:600;text-align:center;color:var(--ink)}
+.arch-step{display:flex;gap:9px;margin-bottom:8px;font-size:12.5px;line-height:1.5;align-items:flex-start}
+.arch-step:last-child{margin-bottom:0}
+.arch-step .as-num{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+/* EXPORT BTN */
+.export-btn{background:var(--card);border:1px solid var(--accent);color:var(--accent);border-radius:12px;padding:9px 16px;font-size:13px;font-weight:600;font-family:'Rubik';cursor:pointer;display:flex;align-items:center;gap:6px}
+</style>
+</head>
+<body>
+<div class="phone">
+
+<!-- ОНБОРДИНГ -->
+<div class="onboard" id="onboard">
+  <div class="mb">🌙</div>
+  <h1>Сонни</h1>
+  <p>Умный помощник по сну малыша 0–3 лет.<br>Трекер, режим и консультант 24/7.</p>
+  <div class="field"><label>Как зовут малыша?</label><input id="ob-name" placeholder="Например, Мия" maxlength="20"></div>
+  <div class="field"><label>Дата рождения</label><input id="ob-bd" type="date" onchange="onBdChange()"></div>
+  <div class="field hidden" id="ob-term-wrap">
+    <label>Малыш родился в срок?</label>
+    <div class="preterm-q">
+      <div class="ptb sel" id="btn-term-yes" onclick="setTerm('yes')">✅ В срок</div>
+      <div class="ptb" id="btn-term-early" onclick="setTerm('early')">Раньше срока</div>
+      <div class="ptb" id="btn-term-late" onclick="setTerm('late')">Позже срока</div>
+    </div>
+  </div>
+  <div class="field hidden" id="ob-due-wrap">
+    <label id="ob-due-lbl">Предполагаемая дата родов (ПДР)</label>
+    <div class="sub" style="margin-bottom:6px">Для расчёта скорректированного возраста</div>
+    <input id="ob-due" type="date">
+  </div>
+  <button class="btn btn-m" onclick="finishOnboard()">Начать 🌙</button>
+</div>
+
+<!-- ШАПКА -->
+<div class="topbar">
+  <div class="logo"><span class="m">☾</span> Сонни</div>
+  <div class="chip" id="babychip" onclick="switchTab('plan',document.querySelectorAll('.tabbtn')[1])"></div>
+</div>
+
+<div class="content">
+
+  <!-- СЕГОДНЯ -->
+  <div class="tab active" id="tab-today">
+    <div class="how-wrap">
+      <div class="how-toggle" id="how-t" onclick="toggleHow()">📖 Как вести трекер? <span class="arr">▼</span></div>
+      <div class="how-body" id="how-b">
+        <div class="how-step"><div class="how-num">1</div><div>Малыш закрыл глаза — нажмите <b>«Малыш засыпает»</b>. На груди, руках, в коляске — всё считается.</div></div>
+        <div class="how-step"><div class="how-num">2</div><div>Открыл глаза — <b>«Малыш проснулся»</b>. Проснулся раньше часа — попробуйте продлить 20 минут, не останавливая таймер.</div></div>
+        <div class="how-step"><div class="how-num">3</div><div>Пауза между снами < 20 мин? Сонни <b>автоматически объединит</b> в один сон.</div></div>
+        <div class="how-step"><div class="how-num">4</div><div>После каждого сна Сонни спросит настроение — это ключ к точным рекомендациям.</div></div>
+        <div class="how-step"><div class="how-num">5</div><div>Опоздали нажать? В диалоге времени можно <b>поправить вручную</b>.</div></div>
+        <div class="how-step"><div class="how-num">6</div><div>История снов за 7 дней — на вкладке <b>📊 История</b>. Там же можно редактировать прошлые записи.</div></div>
+        <div style="background:var(--ms);border-radius:9px;padding:8px 10px;font-size:11.5px;color:#3E6E5C;margin-top:8px">🌙 Ночь = самый длинный непрерывный сон. Сонни определяет автоматически.</div>
+      </div>
+    </div>
+
+    <div class="state" id="statecard">
+      <div class="stars" id="stars"></div>
+      <div class="lbl" id="st-lbl">Бодрствование</div>
+      <div class="bigtime" id="st-time">0:00</div>
+      <div class="hint" id="st-hint"></div>
+      <div class="winrow" id="st-wins"></div>
+    </div>
+    <div id="mainbtns"></div>
+    <div id="flags-wrap"></div>
+
+    <div class="card">
+      <h2>Сегодня</h2>
+      <div id="feed"><div class="sub">Нажмите кнопку когда малыш засыпает — Сонни запустит таймер.</div></div>
+      <div class="totals" id="totals"></div>
+      <div id="daynotice"></div>
+      <div id="calibbox"></div>
+    </div>
+
+    <!-- ИТОГ ДНЯ (появляется после 19:00 или при > 2 снах) -->
+    <div id="eod-wrap"></div>
+  </div>
+
+  <!-- ИСТОРИЯ -->
+  <div class="tab" id="tab-history">
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div>
+        <h2 style="margin:0">История снов</h2>
+        <div class="sub">7 дней · можно редактировать</div>
+      </div>
+      <button class="export-btn" onclick="exportHistory()">📊 Скачать Excel</button>
+    </div>
+    <div id="hist-content"></div>
+  </div>
+
+  <!-- РЕЖИМ -->
+  <div class="tab" id="tab-plan">
+    <!-- Кнопки-памятки архитектуры -->
+    <div class="arch-btn-row">
+      <div class="arch-btn" onclick="toggleArchDetail('formula')">
+        <div class="ab-ico">🏗️</div>
+        <div class="ab-title">Формула сна</div>
+        <div class="ab-sub">АБ → СБ → Ритуал → Укладывание</div>
+      </div>
+      <div class="arch-btn" onclick="toggleArchDetail('ritual')">
+        <div class="ab-ico">🕯️</div>
+        <div class="ab-title">Как сделать ритуал</div>
+        <div class="ab-sub">Безопасность и предсказуемость</div>
+      </div>
+      <div class="arch-btn" onclick="toggleArchDetail('signals')">
+        <div class="ab-ico">🔍</div>
+        <div class="ab-title">Признаки усталости</div>
+        <div class="ab-sub">Как поймать окно в сон</div>
+      </div>
+    </div>
+
+    <!-- Памятка: Формула сна -->
+    <div class="arch-detail" id="arch-formula">
+      <h3>🏗️ Формула спокойного засыпания</h3>
+      <div class="arch-formula">ВБ = Ритуал пробуждения + АБ + СБ + Ритуал засыпания + Укладывание</div>
+      <div class="arch-step"><div class="as-num">1</div><div><b>Активное бодрствование (АБ) — 60%</b><br>Игры, умелки, прогулка, массаж. Малыш расходует энергию. Нагрузки — в первую половину ВБ.</div></div>
+      <div class="arch-step"><div class="as-num">2</div><div><b>Спокойное бодрствование (СБ) — 40%</b><br>Нервная система тормозит. Тихие игры, темнее свет, нет новых людей и впечатлений. Начинаем за 20 мин до сна.</div></div>
+      <div class="arch-step"><div class="as-num">3</div><div><b>Ритуал — 10–15 мин до сна</b><br>Один и тот же каждый раз. Колыбельная, пелёнка, грудь/бутылочка. Малыш учится ждать сон — это безопасность.</div></div>
+      <div class="arch-step"><div class="as-num">4</div><div><b>Укладывание — до 20 мин</b><br>В окно в сон: 5–15 мин когда малыш засыпает по щелчку. Если >20 мин — что-то в архитектуре нарушено.</div></div>
+      <div class="notice tip" style="margin-top:9px;font-size:12px">⚠️ Пока укладывание >20 мин с капризами — работать с другими сложностями нельзя. Сначала архитектура.</div>
+    </div>
+
+    <!-- Памятка: Ритуал -->
+    <div class="arch-detail" id="arch-ritual">
+      <h3>🕯️ Как выстроить ритуал</h3>
+      <div class="arch-step"><div class="as-num">1</div><div><b>Ритуал = безопасность + предсказуемость</b><br>Малыш не умеет ориентироваться во времени. Одинаковая последовательность действий говорит ему: «Сейчас будет сон. Всё хорошо».</div></div>
+      <div class="arch-step"><div class="as-num">2</div><div><b>Длина: 10–15 мин</b><br>Не больше и не меньше. Слишком короткий — малыш не успел замедлиться. Слишком длинный — перевозбуждается.</div></div>
+      <div class="arch-step"><div class="as-num">3</div><div><b>Всегда одинаковый</b><br>Одна и та же песня, одно и то же положение, одни и те же слова. Менять ритуал нельзя — это разрушает ощущение безопасности.</div></div>
+      <div class="arch-step"><div class="as-num">4</div><div><b>Ритуал пробуждения</b><br>Тоже важен! Те же приветственные слова, жест, ласка. Помогает мозгу переключиться в режим бодрствования плавно.</div></div>
+      <div class="notice info" style="margin-top:9px;font-size:12px">💡 Результат правильного ритуала — укладывание за 5–10 мин без слёз уже через 3–5 дней.</div>
+    </div>
+
+    <!-- Памятка: Признаки усталости -->
+    <div class="arch-detail" id="arch-signals">
+      <h3>🔍 Признаки усталости — как поймать окно в сон</h3>
+      <div class="arch-step"><div class="as-num">1</div><div><b>Ранние признаки (укладывать сейчас):</b><br>Зевота, трение глаз, взгляд в одну точку, снижение активности, малыш «завис», перестал улыбаться.</div></div>
+      <div class="arch-step"><div class="as-num">2</div><div><b>Поздние признаки (уже перегулял!):</b><br>Плач, истерика, выгибание, гиперактивность («второе дыхание»), капризность без причины.</div></div>
+      <div class="arch-step"><div class="as-num">3</div><div><b>После 5–6 мес признаки могут быть «ложными»</b><br>Малыш зевнул от скуки, а не от усталости. После этого ориентируемся на время ВБ и биоритмы, не только на признаки.</div></div>
+      <div class="arch-step"><div class="as-num">4</div><div><b>Окно в сон</b><br>5–15 минут, в которые малыш засыпает быстро и спокойно. Поймали окно → уложили легко. Пропустили → укладываем перегулявшего.</div></div>
+      <div class="notice tip" style="margin-top:9px;font-size:12px">⏱ Прогулка, купание, массаж — это активное бодрствование. В СБ их нет. СБ = тишина, полутьма, спокойные игры.</div>
+    </div>
+
+    <div class="arch-card">
+      <div class="arch-hdr" id="arch-hdr" onclick="toggleArch()">
+        <span>📋</span><h2>Архитектура по возрасту</h2><span class="arr">▼</span>
+      </div>
+      <div class="arch-body" id="arch-body">
+        <div class="arch-age">0–3 мес — ритмичный режим</div>
+        <div class="arch-row"><div class="arch-dot"></div><div><b>Всё ВБ — спокойно.</b> Никаких активных игр, яркого света, новых людей. Ребёнок накапливает эмоции очень быстро.</div></div>
+        <div class="arch-row"><div class="arch-dot"></div><div>Режим ритмичный, не фиксированный. Ориентируемся на <b>признаки усталости</b>: зевота, трение глаз, взгляд в одну точку, хныканье.</div></div>
+        <div class="arch-row"><div class="arch-dot"></div><div>После короткого сна (<60 мин с продлением) — ВБ сокращается, СБ усиливается.</div></div>
+        <div class="notice tip" style="margin-top:7px;font-size:11.5px">Подъём не фиксируем. ВБ нарастает от первого к последнему.</div>
+
+        <div class="arch-age">4–6 мес — переход к режиму</div>
+        <div class="arch-row"><div class="arch-dot"></div><div>Первое ВБ всегда <b>короче</b> (~15–20%) — первый сон = продолжение ночи.</div></div>
+        <div class="arch-row"><div class="arch-dot"></div><div>Считаем среднее время подъёма за 4–7 дней → предлагаем зафиксировать.</div></div>
+        <div class="arch-row"><div class="arch-dot"></div><div>За 20 мин до сна — <b>спокойное ВБ (СБ)</b>: тихие игры, нет яркого света и новых впечатлений.</div></div>
+        <div class="arch-row"><div class="arch-dot"></div><div>За 10–15 мин — <b>ритуал</b>: одинаковый каждый раз. Малыш начинает предсказывать сон.</div></div>
+        <div class="arch-row"><div class="arch-dot"></div><div>АБ/СБ = 60/40. После короткого сна (<60 мин) — следующее ВБ сокращается на 5–15%.</div></div>
+
+        <div class="arch-age">6–12 мес — фиксированный режим</div>
+        <div class="arch-row"><div class="arch-dot"></div><div>1-й сон: 9:00–10:00. 2-й сон: 12:00–14:00. 3-й сон — не фиксируем, управляем уходом в ночь.</div></div>
+        <div class="arch-row"><div class="arch-dot"></div><div>Уход в ночь <b>не позже 21:00</b>. Ночь минимум 10 ч. Ценность часов до полуночи выше.</div></div>
+        <div class="arch-row"><div class="arch-dot"></div><div>Нагрузки (врачи, гости, бассейн, папа) — <b>первая половина дня</b>.</div></div>
+        <div class="arch-row"><div class="arch-dot"></div><div>Признаки усталости с 5–6 мес могут быть «ложными». Ориентируемся на ВБ и биоритмы.</div></div>
+
+        <div class="arch-age">12+ мес — 1 сон и переходы</div>
+        <div class="arch-row"><div class="arch-dot"></div><div>На 1 сне: длина >2 ч (до 3). ВБ до и после примерно равное.</div></div>
+        <div class="arch-row"><div class="arch-dot"></div><div>Переход: чередование дней → сокращение последнего сна → тихий час.</div></div>
+        <div class="notice alert" style="margin-top:7px;font-size:11.5px">⚠️ Нормы — максимум после снов >1 ч. Ищем комфортное ВБ малыша, не натягиваем на таблицу.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Примерный план дня <span class="sub" id="plan-age" style="font-weight:400"></span></h2>
+      <div id="planlist"></div>
+    </div>
+    <div class="card">
+      <h2>Нормы сна</h2>
+      <table class="normtable" id="normtab"></table>
+      <div class="notice tip" style="margin-top:8px;font-size:11.5px">📌 ВБ — максимум после снов >1 ч. После коротких (<60 мин) — ВБ сокращается на 5–15%. До 3 мес — всё ВБ спокойно.</div>
+    </div>
+  </div>
+
+  <!-- ЧАТ -->
+  <div class="tab" id="tab-chat">
+    <div class="chatwrap">
+      <div class="chatlog" id="chatlog">
+        <div class="msg bot">Привет! Я Сонни 💛 Знаю возраст малыша, нормы и дневник сегодня. Что беспокоит?</div>
+      </div>
+      <div class="chips" id="chips">
+        <div class="chip2" onclick="quick(this)">Короткие сны</div>
+        <div class="chip2" onclick="quick(this)">Долго укладывается</div>
+        <div class="chip2" onclick="quick(this)">Ранний подъём</div>
+        <div class="chip2" onclick="quick(this)">Признаки регресса?</div>
+        <div class="chip2" onclick="quick(this)">Пора менять режим?</div>
+        <div class="chip2" onclick="quick(this)">Ночные пробуждения</div>
+      </div>
+      <div class="chatbar">
+        <input id="ci" placeholder="Опишите ситуацию…" onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="sendbtn" onclick="sendChat()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TABBAR -->
+<div class="tabbar">
+  <button class="tabbtn active" onclick="switchTab('today',this)"><span class="ti">🛏️</span>Сегодня</button>
+  <button class="tabbtn" onclick="switchTab('history',this)"><span class="ti">📊</span>История</button>
+  <button class="tabbtn" onclick="switchTab('plan',this)"><span class="ti">📅</span>Режим</button>
+  <button class="tabbtn" onclick="switchTab('chat',this)"><span class="ti">💬</span>Сонни</button>
+</div>
+
+<!-- МОДАЛКА: укладывание -->
+<div class="overlay" id="fallOv">
+  <div class="sheet">
+    <h3>Укладывание</h3>
+    <div class="sub" style="margin-bottom:13px">4 параметра — точный анализ ВБ</div>
+    <div class="field">
+      <label>А. Как уснул малыш?</label>
+      <div class="mood3" id="fall-row">
+        <div class="m3" data-v="calm" onclick="pFall(this)"><div class="me">😌</div><div class="ml">Спокойно,<br>нейтрально</div></div>
+        <div class="m3" data-v="fussy" onclick="pFall(this)"><div class="me">😤</div><div class="ml">Капризный,<br>беспокойный</div></div>
+        <div class="m3" data-v="crying" onclick="pFall(this)"><div class="me">😭</div><div class="ml">Протест,<br>плач</div></div>
+      </div>
+    </div>
+    <div class="field hidden" id="wbend-wrap">
+      <label>Б. Настроение за 10–20 мин ДО укладывания?</label>
+      <div class="mood3" id="wbend-row">
+        <div class="m3" data-v="tired" onclick="pWbEnd(this)"><div class="me">😴</div><div class="ml">Показывал<br>усталость</div></div>
+        <div class="m3" data-v="fussy" onclick="pWbEnd(this)"><div class="me">😤</div><div class="ml">Капризный,<br>беспокойный</div></div>
+        <div class="m3" data-v="active" onclick="pWbEnd(this)"><div class="me">😄</div><div class="ml">Бодрый,<br>играл</div></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>В. Сколько минут укладывание? <span style="color:var(--muted);font-weight:400">(норма до 20 мин; если не указано — считаем в норме)</span></label>
+      <div style="display:flex;align-items:center;gap:9px">
+        <input type="number" id="fall-dur" min="1" max="120" placeholder="напр. 15" oninput="onFallDur()"
+          style="width:80px;border:1px solid var(--line);border-radius:11px;padding:9px 11px;font-size:15px;font-family:'Rubik';background:var(--bg);color:var(--ink);outline:none">
+        <span style="font-size:12.5px;color:var(--muted)">мин</span>
+      </div>
+      <div id="fall-dur-hint" style="display:none;margin-top:5px;font-size:11.5px;border-radius:9px;padding:7px 10px;line-height:1.4"></div>
+    </div>
+    <div class="field">
+      <label>Где уснул? <span style="font-weight:400;color:var(--muted)">(необязательно)</span></label>
+      <div class="place-row" id="place-row">
+        <div class="pp" data-v="crib" onclick="pPlace(this)">🛏️ Кроватка</div>
+        <div class="pp" data-v="cosleep" onclick="pPlace(this)">🛌 Совм. сон</div>
+        <div class="pp" data-v="arms" onclick="pPlace(this)">🤱 На руках</div>
+        <div class="pp" data-v="breast" onclick="pPlace(this)">🍼 На груди</div>
+        <div class="pp" data-v="self" onclick="pPlace(this)">⭐ Сам</div>
+        <div class="pp" data-v="stroller" onclick="pPlace(this)">🚗 Коляска</div>
+      </div>
+    </div>
+    <div class="mhint" id="fall-hint"></div>
+    <button class="btn btn-m" style="margin-top:13px" onclick="saveFall()">Сохранить</button>
+    <button class="btn btn-g" onclick="closeFall()">Пропустить</button>
+  </div>
+</div>
+
+<!-- МОДАЛКА: пробуждение -->
+<div class="overlay" id="wakeOv">
+  <div class="sheet">
+    <h3>Пробуждение</h3>
+    <div class="sub" style="margin-bottom:13px">Настроение после сна — ключ к балансу режима</div>
+    <div class="field">
+      <label>Г. Как проснулся малыш?</label>
+      <div class="mood3" id="wake-row">
+        <div class="m3" data-v="happy" onclick="pWake(this)"><div class="me">😊</div><div class="ml">Отлично,<br>весёлый</div></div>
+        <div class="m3" data-v="neutral" onclick="pWake(this)"><div class="me">😐</div><div class="ml">Нейтрально,<br>спокойный</div></div>
+        <div class="m3" data-v="fussy" onclick="pWake(this)"><div class="me">😢</div><div class="ml">Капризный,<br>плакал</div></div>
+      </div>
+      <div class="mhint" id="wake-hint"></div>
+    </div>
+    <div class="field">
+      <label>Как прошло бодрствование? <span style="font-weight:400;color:var(--muted)">(необязательно)</span></label>
+      <textarea id="wb-cmt" class="comment-area" placeholder="Напр.: гулял, был активный; капризничал в конце ВБ…" rows="2"></textarea>
+    </div>
+    <button class="btn btn-m" style="margin-top:5px" onclick="saveWake()">Сохранить</button>
+    <button class="btn btn-g" onclick="closeWake()">Пропустить</button>
+  </div>
+</div>
+
+<!-- МОДАЛКА: ночные пробуждения -->
+<div class="overlay" id="nightOv">
+  <div class="sheet">
+    <h3>Как прошла ночь? 🌙</h3>
+    <div class="sub" style="margin-bottom:13px">Помогает анализировать связь ночи и дня</div>
+    <div class="field">
+      <label>Сколько раз просыпался ночью?</label>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:5px" id="nw-cnt">
+        <div class="pp" data-v="0" onclick="pNwCnt(this)">0 раз</div>
+        <div class="pp" data-v="1" onclick="pNwCnt(this)">1 раз</div>
+        <div class="pp" data-v="2" onclick="pNwCnt(this)">2 раза</div>
+        <div class="pp" data-v="3" onclick="pNwCnt(this)">3 раза</div>
+        <div class="pp" data-v="4" onclick="pNwCnt(this)">4+ раза</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Было ли ночное гуляние дольше 30 мин?</label>
+      <div style="display:flex;gap:7px;margin-top:5px" id="nw-walk">
+        <div class="pp" data-v="no" onclick="pNwWalk(this)" style="flex:1">Нет</div>
+        <div class="pp" data-v="yes" onclick="pNwWalk(this)" style="flex:1">Да, >30 мин</div>
+      </div>
+    </div>
+    <div id="nw-hint" style="display:none;font-size:12px;border-radius:9px;padding:7px 10px;line-height:1.4;margin-top:3px"></div>
+    <button class="btn btn-m" style="margin-top:13px" onclick="saveNight()">Сохранить</button>
+    <button class="btn btn-g" onclick="document.getElementById('nightOv').classList.remove('show')">Пропустить</button>
+  </div>
+</div>
+
+<!-- МОДАЛКА: редактировать запись в истории -->
+<div class="overlay" id="editOv">
+  <div class="sheet">
+    <h3 id="edit-title">Редактировать сон</h3>
+    <div class="sub" style="margin-bottom:13px">Измените время или удалите запись</div>
+    <div class="edit-field-row">
+      <div class="field"><label>Начало сна</label><input type="time" id="edit-start"></div>
+      <div class="field"><label>Конец сна</label><input type="time" id="edit-end"></div>
+    </div>
+    <div class="field">
+      <label>Дата сна</label>
+      <input type="date" id="edit-date">
+    </div>
+    <div class="field">
+      <label>Комментарий</label>
+      <textarea id="edit-cmt" class="comment-area" rows="2" placeholder="Комментарий о бодрствовании…"></textarea>
+    </div>
+    <button class="btn btn-m" onclick="saveEdit()">Сохранить изменения</button>
+    <button class="btn" style="background:var(--warn);color:var(--wi);margin-top:7px" onclick="deleteLog()">🗑️ Удалить этот сон</button>
+    <button class="btn btn-g" onclick="document.getElementById('editOv').classList.remove('show')">Отмена</button>
+  </div>
+</div>
+
+<!-- МОДАЛКА: время -->
+<div class="overlay" id="timeOv">
+  <div class="sheet">
+    <h3 id="time-title">Время</h3>
+    <div class="field"><label id="time-lbl">Проверьте — можно поправить</label><input type="time" id="time-input" style="font-size:20px;font-family:'Comfortaa'"></div>
+    <button class="btn btn-s" onclick="confirmTime()">Подтвердить</button>
+    <button class="btn btn-g" onclick="document.getElementById('timeOv').classList.remove('show')">Отмена</button>
+  </div>
+</div>
+
+<!-- МОДАЛКА: вечерний вход -->
+<div class="overlay" id="evOv">
+  <div class="sheet">
+    <h3>Добрый вечер! 🌙</h3>
+    <div class="sub" style="margin-bottom:14px">Как удобнее начать?</div>
+    <button class="btn btn-s" onclick="evChoice('now')" style="margin-bottom:7px">🌙 Начать сейчас<br><span style="font-size:12px;font-weight:400;opacity:.8">Нажимать только начало и конец снов</span></button>
+    <button class="btn btn-m" onclick="evChoice('fill')" style="margin-bottom:7px">📝 Заполнить с утра<br><span style="font-size:12px;font-weight:400;opacity:.8">Ввести данные за сегодня вручную</span></button>
+    <button class="btn btn-g" onclick="evChoice('tomorrow')">Начну с утра завтра</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+/* ══ НОРМЫ ══ */
+const NORMS=[
+  {m:[0,0],lb:'до 1 мес',wb:[40,50],naps:[3,8],nl:[15,180],ds:[360,840],ns:[300,600],tot:[960,1080]},
+  {m:[1,1],lb:'1 мес',wb:[50,60],naps:[4,6],nl:[40,120],ds:[420,540],ns:[480,540],tot:[900,1080]},
+  {m:[2,2],lb:'2 мес',wb:[60,80],naps:[4,5],nl:[40,120],ds:[360,540],ns:[540,600],tot:[900,1020]},
+  {m:[3,3],lb:'3 мес',wb:[80,100],naps:[3,5],nl:[40,120],ds:[300,420],ns:[600,660],tot:[840,1020]},
+  {m:[4,4],lb:'4 мес',wb:[90,120],naps:[3,4],nl:[40,120],ds:[240,300],ns:[600,660],tot:[840,960]},
+  {m:[5,5],lb:'5 мес',wb:[120,135],naps:[3,3],nl:[40,120],ds:[180,300],ns:[600,720],tot:[840,960]},
+  {m:[6,6],lb:'6 мес',wb:[135,165],naps:[2,3],nl:[40,120],ds:[180,300],ns:[600,720],tot:[780,960]},
+  {m:[7,7],lb:'7 мес',wb:[150,180],naps:[2,3],nl:[60,120],ds:[180,240],ns:[600,720],tot:[780,900]},
+  {m:[8,8],lb:'8 мес',wb:[180,210],naps:[2,3],nl:[60,120],ds:[120,240],ns:[600,720],tot:[780,900]},
+  {m:[9,9],lb:'9 мес',wb:[180,225],naps:[2,3],nl:[60,120],ds:[120,240],ns:[600,720],tot:[780,840]},
+  {m:[10,10],lb:'10 мес',wb:[210,240],naps:[2,2],nl:[60,120],ds:[120,180],ns:[600,720],tot:[780,840]},
+  {m:[11,11],lb:'11 мес',wb:[240,270],naps:[2,2],nl:[60,120],ds:[120,180],ns:[600,720],tot:[780,840]},
+  {m:[12,12],lb:'12 мес',wb:[240,270],naps:[1,2],nl:[60,120],ds:[120,180],ns:[600,720],tot:[780,840]},
+  {m:[13,14],lb:'13–14 мес',wb:[240,300],naps:[1,2],nl:[60,120],ds:[120,180],ns:[600,720],tot:[780,840]},
+  {m:[15,17],lb:'15–17 мес',wb:[240,300],naps:[1,2],nl:[60,120],ds:[120,180],ns:[600,720],tot:[780,840]},
+  {m:[18,23],lb:'18 мес',wb:[270,330],naps:[1,1],nl:[60,180],ds:[90,180],ns:[600,720],tot:[780,840]},
+  {m:[24,35],lb:'2 года',wb:[300,360],naps:[1,1],nl:[60,150],ds:[90,120],ns:[600,660],tot:[720,780]},
+  {m:[36,47],lb:'3 года',wb:[300,360],naps:[1,1],nl:[60,120],ds:[60,120],ns:[600,660],tot:[660,780]},
+  {m:[48,84],lb:'4–7 лет',wb:[300,360],naps:[0,1],nl:[60,120],ds:[60,120],ns:[570,660],tot:[600,780]},
+];
+const REGRESSIONS=[
+  {m:[3,5],name:'Регресс 4 месяцев',cause:'Перестройка архитектуры сна на взрослые циклы.',
+   tips:['Сохранять ВБ, не перегуливать','Усилить ритуал + белый шум','Продление снов — приоритет','Пройдёт за 2–6 недель']},
+  {m:[7,11],name:'Регресс 8–10 месяцев',cause:'Скачок развития (ползание, вставание). Мозг перегружен.',
+   tips:['Не убирать сон — это не переход!','Практиковать навыки ДО сна','Пройдёт за 2–4 недели']},
+  {m:[11,14],name:'Регресс 12 месяцев',cause:'Переход 2→1 сон — один из самых значимых.',
+   tips:['Большинству нужно до 15–18 мес','Чередовать дни: 1 сон / 2 сна','Пройдёт за 3–6 недель']},
+  {m:[17,21],name:'Регресс 18 месяцев',cause:'Пик сепарационной тревоги + речевой скачок.',
+   tips:['Дневной сон сохраняем','Тихий час как альтернатива','Больше физической активности утром','Пройдёт за 3–6 недель']},
+  {m:[24,40],name:'Регресс 2 лет',cause:'Кризис 2 лет — «Нет!» как проявление автономии.',
+   tips:['Давать выбор в ритуале','Чёткие границы + предсказуемость','Дневной сон сохранять','Пройдёт за 4–8 недель']},
+];
+
+/* ══ СОСТОЯНИЕ ══ */
+let profile=null, logs=[], sleeping=null, morningWake=null, chatHistory=[];
+let nightData=null, pendingWakeId=null;
+let selFall=null, selWbEnd=null, selWake=null, selPlace=null;
+let selNwCnt=null, selNwWalk=null, timeCtx=null;
+let editingLogId=null;
+let eodFeedback={}; // {date: 'yes'|'no'}
+
+/* ══ ХРАНИЛИЩЕ ══ */
+async function loadAll(){
+  try{const p=await window.storage.get('sonny:profile');profile=JSON.parse(p.value);}catch(e){profile=null;}
+  try{
+    const d=await window.storage.get('sonny:data8');const o=JSON.parse(d.value);
+    logs=o.logs||[];sleeping=o.sleeping||null;morningWake=o.morningWake||null;
+    nightData=o.nightData||null;eodFeedback=o.eodFeedback||{};
+    const today=todayStr();
+    if(morningWake&&!isToday(morningWake))morningWake=null;
+    if(sleeping&&!isToday(sleeping.start))sleeping=null;
+    if(nightData&&!isToday(nightData.ts))nightData=null;
+    if(profile&&profile.entryMode==='now'){
+      const lts=morningWake||(logs.length?Math.max(...logs.map(l=>l.start)):0);
+      if(lts&&!isToday(lts)){profile.entryMode='morning';saveProfile();}
+    }
+  }catch(e){}
+}
+async function saveData(){
+  try{await window.storage.set('sonny:data8',JSON.stringify({logs,sleeping,morningWake,nightData,eodFeedback}));}catch(e){}
+}
+async function saveProfile(){try{await window.storage.set('sonny:profile',JSON.stringify(profile));}catch(e){}}
+
+/* ══ УТИЛИТЫ ══ */
+const pad=n=>String(n).padStart(2,'0');
+const fmtT=ts=>{const d=new Date(ts);return pad(d.getHours())+':'+pad(d.getMinutes());};
+const fmtDur=min=>{min=Math.round(min);const h=Math.floor(min/60),m=min%60;return h?(h+' ч '+(m?m+' мин':'')):m+' мин';};
+const fmtClock=min=>{const h=Math.floor(min/60),m=Math.round(min%60);return h+':'+pad(m);};
+function isToday(ts){const d=new Date(ts),n=new Date();return d.getDate()===n.getDate()&&d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear();}
+function todayStr(){const n=new Date();return `${n.getFullYear()}-${pad(n.getMonth()+1)}-${pad(n.getDate())}`;}
+function dateStr(ts){const d=new Date(ts);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;}
+function fmtDateRu(ts){const d=new Date(ts);const days=['вс','пн','вт','ср','чт','пт','сб'];const months=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];return `${d.getDate()} ${months[d.getMonth()]}, ${days[d.getDay()]}`;}
+function ageMonths(){
+  if(!profile)return 6;
+  const base=profile.dueDate?new Date(profile.dueDate):new Date(profile.birthDate);
+  const now=new Date();let m=(now.getFullYear()-base.getFullYear())*12+(now.getMonth()-base.getMonth());
+  if(now.getDate()<base.getDate())m--;return Math.max(0,m);
+}
+function norm(){const a=ageMonths();return NORMS.find(n=>a>=n.m[0]&&a<=n.m[1])||NORMS[NORMS.length-2];}
+function wbMid(n){return Math.round((n.wb[0]+n.wb[1])/2);}
+function wbFirst(n){return Math.max(n.wb[0],Math.round(wbMid(n)*0.85));}
+function wbLast(n){return Math.round(wbMid(n)*1.12);}
+function isNightSleep(log){
+  if(!log.end)return false;
+  const dur=(log.end-log.start)/60000;if(dur<180)return false;
+  const h=new Date(log.start).getHours();return h>=17||h<2;
+}
+function isCurrentNight(){if(!sleeping)return false;const h=new Date(sleeping.start).getHours();return h>=17||h<7;}
+function todayDayLogs(){
+  return logs.filter(l=>{
+    if(!l.end)return isToday(l.start)&&!isCurrentNight();
+    return !isNightSleep(l)&&isToday(l.start);
+  }).sort((a,b)=>a.start-b.start);
+}
+function todayNightLog(){return logs.find(l=>isNightSleep(l)&&(isToday(l.start)||isToday(l.end)));}
+function getLogsForDate(dstr){
+  return logs.filter(l=>dateStr(l.start)===dstr&&!isNightSleep(l)&&l.end).sort((a,b)=>a.start-b.start);
+}
+function getNightForDate(dstr){
+  return logs.find(l=>isNightSleep(l)&&(dateStr(l.start)===dstr||dateStr(l.end)===dstr));
+}
+
+/* ══ ОНБОРДИНГ ══ */
+let termChoice='yes';
+function onBdChange(){
+  const bd=document.getElementById('ob-bd').value;if(!bd)return;
+  const bdate=new Date(bd),now=new Date();
+  const ageM=(now.getFullYear()-bdate.getFullYear())*12+(now.getMonth()-bdate.getMonth());
+  document.getElementById('ob-term-wrap').classList.toggle('hidden',ageM>=4);
+  if(ageM>=4)document.getElementById('ob-due-wrap').classList.add('hidden');
+}
+function setTerm(v){
+  termChoice=v;
+  ['yes','early','late'].forEach(k=>{const el=document.getElementById('btn-term-'+k);if(el)el.classList.toggle('sel',k===v);});
+  document.getElementById('ob-due-wrap').classList.toggle('hidden',v==='yes');
+}
+async function finishOnboard(){
+  const name=document.getElementById('ob-name').value.trim()||'Малыш';
+  const bd=document.getElementById('ob-bd').value;if(!bd){alert('Укажите дату рождения');return;}
+  let due=null;if(termChoice!=='yes')due=document.getElementById('ob-due').value||null;
+  profile={name,birthDate:bd,dueDate:due,termChoice};
+  await saveProfile();
+  document.getElementById('onboard').classList.add('hidden');
+  const h=new Date().getHours();
+  if(h>=17||h<6)showEvOverlay();else renderAll();
+}
+function showEvOverlay(){renderAll();document.getElementById('evOv').classList.add('show');}
+function evChoice(mode){
+  document.getElementById('evOv').classList.remove('show');
+  profile.entryMode=mode;saveProfile();renderAll();
+  if(mode==='fill')setTimeout(()=>showNotice('Нажмите «Малыш засыпает» и укажите реальное время первого сна.','info'),400);
+}
+
+/* ══ ЛОГИКА СНА ══ */
+function startSleep(ts){
+  if(!morningWake){
+    const n=norm();const auto=ts-wbFirst(n)*60000;
+    morningWake=auto;if(profile)profile.autoMorning=true;saveProfile();
+    showNotice('Подъём автоматически: '+fmtT(auto)+' (ВБ '+wbFirst(n)+' мин). Нажмите ✏️ чтобы поправить.','info');
+  }
+  const t=todayDayLogs();
+  const last=[...t].reverse().find(l=>l.end&&(ts-l.end)<20*60*1000);
+  if(last){
+    sleeping={start:last.start,moodFall:last.moodFall,wbEnd:last.wbEnd,fallDuration:last.fallDuration,place:last.place};
+    logs=logs.filter(l=>l.id!==last.id);
+    showNotice('Пауза <20 мин — объединил в один сон.','info');
+  }else sleeping={start:ts};
+  saveData();renderAll();openFall();
+}
+function endSleep(ts){
+  if(!sleeping)return;
+  const dur=(ts-sleeping.start)/60000;
+  const isNight=isNightSleep({start:sleeping.start,end:ts});
+  const entry={id:Date.now(),start:sleeping.start,end:ts,type:isNight?'night':'day',
+    moodFall:sleeping.moodFall||null,wbEnd:sleeping.wbEnd||null,
+    fallDuration:sleeping.fallDuration||null,place:sleeping.place||null,
+    moodWake:null,wbComment:null};
+  logs.push(entry);sleeping=null;
+  saveData();renderAll();
+  pendingWakeId=entry.id;openWake(dur,isNight);
+}
+function setMorning(ts){
+  const t=todayDayLogs();
+  const firstSleep=t.length?t[0].start:(sleeping?sleeping.start:null);
+  if(firstSleep&&ts>firstSleep){
+    document.getElementById('time-lbl').textContent='⚠️ Подъём должен быть до '+fmtT(firstSleep);
+    document.getElementById('time-input').style.borderColor='var(--rose)';return;
+  }
+  if(profile)profile.autoMorning=false;saveProfile();
+  morningWake=ts;saveData();renderAll();
+  setTimeout(()=>document.getElementById('nightOv').classList.add('show'),600);
+}
+function dayTotals(){
+  const t=todayDayLogs().filter(l=>l.end).sort((a,b)=>a.start-b.start);
+  let ds=0;t.forEach(l=>{ds+=(l.end-l.start)/60000;});
+  // ВБ = сумма всех отрезков бодрствования
+  let wb=0;
+  if(morningWake){
+    if(t.length===0){
+      const ref=sleeping?sleeping.start:Date.now();
+      wb=Math.max(0,(ref-morningWake)/60000);
+    }else{
+      wb+=Math.max(0,(t[0].start-morningWake)/60000);
+      for(let i=1;i<t.length;i++) wb+=Math.max(0,(t[i].start-t[i-1].end)/60000);
+      const refNow=sleeping?sleeping.start:Date.now();
+      wb+=Math.max(0,(refNow-t[t.length-1].end)/60000);
+    }
+  }
+  const plan=buildPlan();
+  const plannedNaps=plan.rows.filter(r=>r.type==='s').length;
+  return{ds,wb:Math.max(0,wb),naps:t.length,plannedNaps};
+}
+function nextWindow(){
+  const n=norm();const t=todayDayLogs();
+  const lastWake=t.length?t[t.length-1].end:morningWake;if(!lastWake)return null;
+  const isFirst=t.length===0,napsLeft=n.naps[0]-t.length;
+  let wb;
+  if(isFirst)wb=wbFirst(n);
+  else if(napsLeft<=0)wb=wbLast(n);
+  else wb=wbMid(n);
+  // Сокращение ВБ после короткого сна < 60 мин: 5–15%
+  if(!isFirst){
+    const ld=(t[t.length-1].end-t[t.length-1].start)/60000;
+    if(ld<60)wb=Math.round(wb*(1-Math.min(0.15,Math.max(0.05,(60-ld)/200))));
+  }
+  const putdown=lastWake+wb*60000;
+  return{calm:putdown-20*60000,ritual:putdown-12*60000,putdown,wb,isNight:napsLeft<=0};
+}
+
+/* ══ АЛГОРИТМ А+Б+В+Г ══ */
+function analyzeLog(l){
+  if(!l.end)return null;
+  const dur=(l.end-l.start)/60000;
+  const isShort=dur<60; // < 60 мин (с продлением)
+  const mf=l.moodFall, wb=l.wbEnd, fd=l.fallDuration, mw=l.moodWake;
+  const res=[];
+  // Параметр В
+  if(fd){
+    if(fd<5)res.push({type:'alert',icon:'⚡',text:'Засыпание за '+fd+' мин',action:'Перегул — сократите ВБ на 15 мин'});
+    else if(fd<=20)res.push({type:'ok',icon:'✅',text:'Укладывание '+fd+' мин — в норме',action:null});
+    else if(fd<=35)res.push({type:'tip',icon:'⏱️',text:'Укладывание '+fd+' мин',action:'Смотрим настроение: капризы → перегул, спокойный → недогул'});
+    else res.push({type:'alert',icon:'⏱️',text:'Укладывание '+fd+' мин — сигнал',action:fd>20&&mf==='calm'?'Недогул — увеличьте ВБ':'Перегул — сократите ВБ'});
+  }
+  // А+Б → вывод
+  if(mf==='calm'){
+    if(wb==='active')res.push({type:'tip',icon:'💡',text:'Уснул спокойно, но до этого был бодрый',action:'Недогул — увеличьте ВБ на 10–15 мин, добавьте активности в первой половине ВБ'});
+    else if(wb==='fussy')res.push({type:'alert',icon:'⚠️',text:'Уснул спокойно, но до этого был капризный',action:'Перевозбуждение — увеличьте долю СБ, начинайте замедление раньше'});
+    else if(fd&&fd<=20&&(mw==='happy'||mw==='neutral'))res.push({type:'ok',icon:'✅',text:'Уснул спокойно, проснулся хорошо',action:'ВБ подобрано верно — не менять'});
+  }
+  if(mf==='fussy'){
+    if(wb==='fussy'||wb==='tired')res.push({type:'alert',icon:'😤',text:'Капризил при укладывании + был беспокойным до сна',action:'Перегул/перевозбуждение — сократите ВБ на 10–15 мин, добавьте СБ'});
+    else if(wb==='active')res.push({type:'tip',icon:'💡',text:'Капризил, но до сна был бодрый',action:'Проверьте: успокоился сразу = недогул (+10 мин ВБ). Продолжает = перевозбуждение'});
+    else res.push({type:'alert',icon:'😤',text:'Капризил при укладывании',action:'Уточните настроение до сна — перегул или недогул'});
+  }
+  if(mf==='crying')res.push({type:'alert',icon:'😭',text:'Протест и плач при укладывании',action:'Перегул — сократите ВБ на 15 мин. Следующий раз — укладывайте раньше'});
+  // Параметр Г
+  if(mw==='fussy'){
+    if(isShort)res.push({type:'alert',icon:'😢',text:'Капризное пробуждение + короткий сон (<60 мин)',action:'Перегул или регресс. Продлите следующий сон, сократите ВБ'});
+    else res.push({type:'tip',icon:'😢',text:'Капризничал, хотя поспал хорошо',action:'Сонная ассоциация — причина не в ВБ. Возможны ночные пробуждения'});
+  }
+  if(mw==='happy'&&!res.find(r=>r.type==='ok'))res.push({type:'ok',icon:'😊',text:'Проснулся весёлым',action:'Сон восстановительный — ВБ подходит'});
+  return res.length?res:null;
+}
+
+function analyzeCalib(){
+  const t=todayDayLogs().filter(l=>l.end);if(!t.length)return null;
+  const all=[],perNap=[];let alerts=0,oks=0;
+  t.forEach((l,i)=>{const res=analyzeLog(l);if(!res)return;perNap.push({napIdx:i+1,results:res});
+    res.forEach(r=>{all.push(r);if(r.type==='alert')alerts++;else if(r.type==='ok')oks++;});});
+  if(!all.length)return null;
+  let summary=null;
+  if(alerts>=2)summary={type:'alert',text:'⚠️ Несколько признаков перегула. Сократите ВБ на 10–15 мин на тот же отрезок завтра.'};
+  else if(oks>0&&alerts===0)summary={type:'ok',text:'✅ Сегодня всё складывается хорошо — режим работает!'};
+  const transCheck=checkTransition(t,norm());
+  return{perNap,summary,transCheck,alerts,oks};
+}
+
+function checkTransition(t,n){
+  if(n.naps[0]<=1||logs.length<10)return null;
+  const last3=[];
+  for(let d=1;d<=4;d++){
+    const ds=new Date();ds.setDate(ds.getDate()-d);ds.setHours(0,0,0,0);
+    const de=new Date(ds);de.setDate(de.getDate()+1);
+    const dl=logs.filter(l=>l.start>=ds&&l.start<de&&!isNightSleep(l)&&l.end);
+    if(dl.length)last3.push(dl);
+  }
+  if(last3.length<2)return null;
+  let c1=0,c2=0;
+  last3.forEach(day=>{const ln=day[day.length-1];if(ln){if(ln.fallDuration&&ln.fallDuration>20)c1++;if(ln.wbEnd==='active')c2++;}});
+  if(c1>=2&&c2>=2)return{ready:true,msg:'Возможно, малыш готов перейти на '+(n.naps[0]-1)+' сна. Обсудите с Сонни.'};
+  return null;
+}
+
+function computeFlags(){
+  const flags=[];const a=ageMonths(),n=norm();
+  const t=todayDayLogs().filter(l=>l.end);
+  if(nightData){
+    if(nightData.walk==='yes')flags.push({level:'alert',text:'Ночное гуляние >30 мин — засчитывается в ВБ за сутки. Проверьте баланс ДС.'});
+    if(nightData.count>='4')flags.push({level:'alert',text:'4+ пробуждений за ночь — сонная ассоциация или накопленный недосып. Спросите Сонни.'});
+    else if(nightData.count>='2'&&a>4)flags.push({level:'tip',text:'Частые ночные пробуждения ('+nightData.count+'). Убедитесь, что ДС в норме.'});
+    if(nightData.count==='0')flags.push({level:'praise',text:'🌟 Ночь без пробуждений — отличный результат!'});
+  }
+  if(morningWake){
+    const wh=new Date(morningWake).getHours();
+    if(wh<6)flags.push({level:'alert',text:'⏰ Подъём до 6:00 — ранний подъём. Проверьте время ухода в ночь и последний дневной сон.'});
+    else if(wh>=9&&a>4)flags.push({level:'tip',text:'⏰ Подъём после 9:00. Желательно мягко сдвигать к 6:00–8:00.'});
+  }
+  const reg=REGRESSIONS.find(r=>a>=r.m[0]&&a<=r.m[1]);
+  if(reg&&t.length>0){const short=t.filter(l=>(l.end-l.start)/60000<60).length;if(short>=2)flags.push({level:'regression',...reg});}
+  const d=dayTotals();
+  if(morningWake&&d.naps>0&&d.ds<n.ds[0]*0.6)flags.push({level:'tip',text:'Дневного сна пока мало. Норма: '+fmtClock(n.ds[0])+'–'+fmtClock(n.ds[1])+'.'});
+  return flags;
+}
+
+/* ══ ИТОГ ДНЯ (End-of-Day) ══ */
+function buildEodSummary(){
+  const t=todayDayLogs().filter(l=>l.end);const d=dayTotals();const n=norm();
+  const a=ageMonths();const h=new Date().getHours();
+  if(h<18&&t.length<2)return null; // показываем после 18:00 или когда >2 снов
+  const calib=analyzeCalib();
+  const today=todayStr();
+  if(eodFeedback[today])return null; // уже дала обратную связь
+
+  let lines=[];
+  // Статистика дня
+  lines.push('День: '+t.length+' '+(t.length===1?'сон':'сна')+', ДС '+fmtClock(d.ds)+' (норма '+fmtClock(n.ds[0])+'–'+fmtClock(n.ds[1])+')');
+  // Главный вывод
+  if(calib){
+    if(calib.summary&&calib.summary.type==='alert')lines.push('Главный сигнал: '+calib.summary.text.replace('⚠️ ',''));
+    else if(calib.summary&&calib.summary.type==='ok')lines.push('Отлично — настроение малыша сегодня хорошее.');
+  }
+  // Рекомендация на завтра
+  const w=nextWindow();
+  if(w)lines.push('На завтра: первое окно в сон ориентировочно в '+fmtT(w.calm)+', спать в '+fmtT(w.putdown)+'.');
+  if(calib&&calib.alerts>=2)lines.push('Попробуйте сократить ВБ на 10–15 мин на проблемном отрезке.');
+  if(nightData&&nightData.count==='0')lines.push('Ночь без пробуждений — так держать! 🌟');
+  return lines.join('\n');
+}
+
+/* ══ РЕНДЕР ══ */
+function renderAll(){renderChip();renderState();renderFeed();renderFlags();renderCalib();renderEod();renderPlan();renderHistory();}
+
+function renderChip(){
+  if(!profile)return;
+  document.getElementById('babychip').innerHTML='<b>'+profile.name+'</b> · '+ageMonths()+' мес'+(profile.dueDate?' (скорр.)':'');
+}
+
+function renderState(){
+  const card=document.getElementById('statecard');
+  const lbl=document.getElementById('st-lbl');
+  const hint=document.getElementById('st-hint');
+  const wins=document.getElementById('st-wins');
+  const wrap=document.getElementById('mainbtns');
+  const em=profile?(profile.entryMode||'morning'):'morning';
+
+  if(sleeping&&isCurrentNight()){
+    card.className='state nightsl';makeStars();
+    lbl.textContent='Ночной сон';
+    hint.textContent='Тс-с… Сонни ждёт утра.';
+    wins.innerHTML='<div class="wp"><div class="wt">Уснул</div><div class="wv">'+fmtT(sleeping.start)+'</div></div>'+
+      '<div class="wp"><div class="wt">Спит</div><div class="wv">'+fmtClock((Date.now()-sleeping.start)/60000)+'</div></div>';
+    wrap.innerHTML='<button class="btn btn-w" onclick="askTime(\'wake\')">☀️ Малыш проснулся (утро)</button>'+
+      '<button class="btn btn-g" onclick="askTime(\'fixstart\')">Изменить время засыпания</button>';
+  }else if(sleeping){
+    card.className='state asleep';makeStars();
+    lbl.textContent='Дневной сон';
+    hint.textContent='Таймер идёт. Пауза <20 мин — объединю в один сон.';
+    wins.innerHTML='<div class="wp"><div class="wt">Уснул</div><div class="wv">'+fmtT(sleeping.start)+'</div></div>'+
+      '<div class="wp"><div class="wt">Хороший сон</div><div class="wv">от 1 ч</div></div>';
+    wrap.innerHTML='<button class="btn btn-w" onclick="askTime(\'wake\')">☀️ Малыш проснулся</button>'+
+      '<button class="btn btn-g" onclick="askTime(\'fixstart\')">Изменить время засыпания</button>';
+  }else if(em==='now'&&!morningWake&&todayDayLogs().length===0){
+    card.className='state';
+    lbl.textContent='Трекер готов';
+    document.getElementById('st-time').textContent='';
+    hint.innerHTML='Нажмите когда малыш <b>засыпает</b> — Сонни запустит таймер.';
+    wins.innerHTML='';
+    wrap.innerHTML='<button class="btn btn-s" onclick="askTime(\'sleep\')">🌙 Малыш засыпает</button>'+
+      '<button class="btn btn-g" onclick="switchMode()">Ввести данные с утра</button>';
+  }else if(!morningWake){
+    card.className='state';lbl.textContent='Доброе утро';
+    document.getElementById('st-time').textContent=fmtT(Date.now());
+    hint.textContent='Отметьте время подъёма — от него Сонни рассчитает весь день.';
+    wins.innerHTML='';
+    wrap.innerHTML='<button class="btn btn-m" onclick="askTime(\'morning\')">☀️ Малыш проснулся утром</button>';
+  }else{
+    card.className='state';lbl.textContent='Бодрствование';
+    const w=nextWindow();
+    if(w){
+      const nl=w.isNight?'уход в ночь':'следующий сон';
+      hint.innerHTML='СБ с <b>'+fmtT(w.calm)+'</b>, ритуал в <b>'+fmtT(w.ritual)+'</b>.<br>ВБ — <b>максимум</b>, лучше уложить раньше.';
+      wins.innerHTML='<div class="wp"><div class="wt">Окно — '+nl+'</div><div class="wv">'+fmtT(w.putdown)+'</div></div>'+
+        '<div class="wp"><div class="wt">Макс. ВБ</div><div class="wv">'+fmtClock(w.wb)+'</div></div>';
+    }
+    wrap.innerHTML='<button class="btn btn-s" onclick="askTime(\'sleep\')">🌙 Малыш уснул</button>';
+  }
+  tickTimer();
+}
+function switchMode(){if(profile){profile.entryMode='morning';saveProfile();}renderAll();}
+
+let timerInt=null;
+function tickTimer(){
+  clearInterval(timerInt);
+  const el=document.getElementById('st-time');
+  function upd(){
+    let from=null;
+    if(sleeping)from=sleeping.start;
+    else if(morningWake){const t=todayDayLogs();from=t.length?t[t.length-1].end:morningWake;}
+    if(from){
+      el.textContent=fmtClock((Date.now()-from)/60000);
+      if(!sleeping&&morningWake){
+        const w=nextWindow();const done=todayDayLogs().filter(l=>l.end).length;
+        if(w&&Date.now()>w.putdown+10*60000&&done>0)showNotice('ВБ превышено — возможен перегул. Укладывайте мягко.','alert');
+      }
+    }
+  }
+  upd();timerInt=setInterval(upd,15000);
+}
+
+const PL={crib:'🛏️',cosleep:'🛌',arms:'🤱',breast:'🍼',self:'⭐',stroller:'🚗'};
+const PLN={crib:'кроватка',cosleep:'совм. сон',arms:'руки',breast:'грудь',self:'сам',stroller:'коляска'};
+const FE={calm:'😌',fussy:'😤',crying:'😭'};
+const WE={happy:'😊',neutral:'😐',fussy:'😢'};
+
+function renderFeed(){
+  const t=todayDayLogs(),night=todayNightLog();
+  const feed=document.getElementById('feed');let html='';
+  if(morningWake){
+    const am=profile&&profile.autoMorning;
+    const nwTxt=nightData?(' · '+(nightData.count==='0'?'без пробужд.':nightData.count+' пробужд.')+(nightData.walk==='yes'?' + гуляние':'')):'' ;
+    html+='<div class="fi"><div class="ficon fi-w">☀️</div><div class="fmain">'+
+      '<div class="ft">Утренний подъём'+(am?' <span class="tag" style="color:var(--accent);border-color:var(--accent)">авто</span>':'')+
+      ' <span style="font-size:10.5px;color:var(--accent);cursor:pointer" onclick="askTime(\'morning\')">✏️</span></div>'+
+      '<div class="fs">'+fmtT(morningWake)+nwTxt+'</div></div></div>';
+  }
+  if(night&&night.end){
+    html+='<div class="fi"><div class="ficon fi-n" style="color:#F6C98B;font-size:15px">🌑</div><div class="fmain">'+
+      '<div class="ft">Ночной сон · '+fmtDur((night.end-night.start)/60000)+'</div>'+
+      '<div class="fs">'+fmtT(night.start)+' – '+fmtT(night.end)+'</div></div></div>';
+  }
+  t.forEach((l,i)=>{
+    if(!l.end)return;
+    const dur=(l.end-l.start)/60000,short=dur<60;
+    const fe=l.moodFall?FE[l.moodFall]:'',we=l.moodWake?WE[l.moodWake]:'';
+    const pl=l.place?(PL[l.place]+' '+PLN[l.place]):'';
+    const fd=l.fallDuration,fdOk=fd&&fd<=20;
+    const durTxt=fd&&fd>20?', укл. '+fd+' мин ⚠️':'';
+    const cmt=l.wbComment?('<div class="fcmt">💬 '+l.wbComment+'</div>'):'';
+    const stag=short?'<span class="tag warn">кор.</span>':'';
+    const dok=fdOk?'<span class="tag ok">'+fd+' мин</span>':'';
+    html+='<div class="fi"><div class="ficon fi-d">🌙</div><div class="fmain">'+
+      '<div class="ft"><span>'+(i+1)+'-й сон · '+fmtDur(dur)+'</span>'+stag+dok+'</div>'+
+      '<div class="fs">'+fmtT(l.start)+' – '+fmtT(l.end)+durTxt+(pl?' · '+pl:'')+'</div>'+
+      cmt+'</div><div class="fbadge">'+fe+' '+we+'</div></div>';
+  });
+  feed.innerHTML=html||'<div class="sub">Нажмите кнопку когда малыш засыпает — Сонни запустит таймер.</div>';
+
+  const totals=document.getElementById('totals');
+  if(morningWake){
+    const d=dayTotals(),n=norm();
+    const dsOk=d.ds>=n.ds[0]*.85,dsLow=d.ds<n.ds[0]*.6&&d.naps>0;
+    totals.innerHTML=
+      '<div class="tp"><div class="tv '+(dsOk?'ok':dsLow?'warn':'')+'">'+fmtClock(d.ds)+'</div><div class="tt">дневной сон</div></div>'+
+      '<div class="tp"><div class="tv">'+fmtClock(d.wb)+'</div><div class="tt">бодрствование</div></div>'+
+      '<div class="tp"><div class="tv">'+(d.plannedNaps?d.naps+' / '+d.plannedNaps:d.naps)+'</div><div class="tt">снов (план)</div></div>';
+  }else totals.innerHTML='';
+}
+
+function renderFlags(){
+  const wrap=document.getElementById('flags-wrap');
+  const flags=computeFlags();if(!flags.length){wrap.innerHTML='';return;}
+  let html='';
+  flags.forEach(f=>{
+    if(f.level==='regression'){
+      html+='<div class="reg-badge"><div class="rb-icon">🌀</div><div>'+
+        '<div class="rb-title">'+f.name+'</div><div class="rb-text">'+f.cause+'</div>'+
+        '<div class="rb-actions">'+f.tips.map(t=>'<div class="rb-chip">'+t+'</div>').join('')+'</div></div></div>';
+    }else{
+      html+='<div class="notice '+f.level+'" style="margin-bottom:6px">'+f.text+'</div>';
+    }
+  });
+  wrap.innerHTML=html;
+}
+
+function renderCalib(){
+  const box=document.getElementById('calibbox');
+  const calib=analyzeCalib();if(!calib){box.innerHTML='';return;}
+  let html='<div class="calib-box"><div class="calib-title">📊 Анализ настроения сегодня</div>';
+  calib.perNap.forEach(({results})=>{
+    if(!results)return;
+    results.forEach(r=>{
+      if(r.type==='ok'&&calib.alerts>0)return;
+      html+='<div class="calib-row"><div class="calib-ico">'+r.icon+'</div>'+
+        '<div>'+r.text+(r.action?' → <span class="calib-act">'+r.action+'</span>':'')+'</div></div>';
+    });
+  });
+  if(calib.transCheck&&calib.transCheck.ready)html+='<div class="notice tip" style="margin-top:7px">🔄 '+calib.transCheck.msg+'</div>';
+  if(calib.summary)html+='<div class="notice '+calib.summary.type+'" style="margin-top:7px">'+calib.summary.text+'</div>';
+  if(calib.oks>0&&calib.alerts===0)html+='<div class="notice praise" style="margin-top:7px">🌟 Молодец! Настроение малыша сегодня хорошее.</div>';
+  box.innerHTML=html+'</div>';
+}
+
+function renderEod(){
+  const wrap=document.getElementById('eod-wrap');
+  const summary=buildEodSummary();
+  if(!summary){wrap.innerHTML='';return;}
+  const today=todayStr();
+  wrap.innerHTML='<div class="eod-card">'+
+    '<div class="eod-title">🌙 Итог дня</div>'+
+    '<div class="eod-text">'+summary.replace(/\n/g,'<br>')+'</div>'+
+    '<div style="font-size:12px;color:#9D94C6;margin-bottom:10px">Рекомендации полезны?</div>'+
+    '<div class="eod-actions">'+
+    '<button class="eod-btn eod-yes" onclick="eodAnswer(\'yes\')">👍 Полезно</button>'+
+    '<button class="eod-btn eod-no" onclick="eodAnswer(\'no\')">🤔 Не очень</button>'+
+    '</div></div>';
+}
+function eodAnswer(v){
+  const today=todayStr();
+  eodFeedback[today]=v;saveData();
+  const wrap=document.getElementById('eod-wrap');
+  if(v==='yes'){
+    wrap.innerHTML='<div class="notice praise">👍 Отлично! Продолжайте в том же режиме. Завтра Сонни снова проанализирует день.</div>';
+  }else{
+    wrap.innerHTML='<div class="notice info">🤔 Спасибо за честность! Напишите в чат Сонни что именно не совпало — уточним рекомендации.</div>';
+  }
+  saveData();
+}
+
+let noticeTimeout=null;
+function showNotice(text,type){
+  const box=document.getElementById('daynotice');
+  box.innerHTML='<div class="notice '+type+'">'+text+'</div>';
+  clearTimeout(noticeTimeout);noticeTimeout=setTimeout(()=>{box.innerHTML='';},20000);
+}
+
+/* ══ ИСТОРИЯ (7 дней) ══ */
+function renderHistory(){
+  if(document.getElementById('tab-history').style.display==='none'&&!document.getElementById('tab-history').classList.contains('active'))return;
+  const content=document.getElementById('hist-content');
+  const today=new Date();let html='';
+  for(let d=0;d<7;d++){
+    const date=new Date(today);date.setDate(date.getDate()-d);date.setHours(0,0,0,0);
+    const dstr=dateStr(date.getTime());
+    const dayLogs=getLogsForDate(dstr);
+    const nightLog=getNightForDate(dstr);
+    let ds=0;dayLogs.forEach(l=>ds+=(l.end-l.start)/60000);
+    const nightDur=nightLog?((nightLog.end-nightLog.start)/60000):0;
+    const wakeTs=d===0?morningWake:null;
+
+    html+='<div class="hist-day">'+
+      '<div class="hist-date">'+fmtDateRu(date.getTime())+'</div>';
+
+    if(!dayLogs.length&&!nightLog){html+='<div class="sub" style="font-size:12px;color:var(--muted);margin-bottom:8px">Нет данных за этот день</div>';html+='</div>';continue;}
+
+    // Статистика дня
+    html+='<div class="hist-stat">'+
+      '<div class="hsp"><div class="hv">'+fmtClock(ds)+'</div><div class="ht">дн. сон</div></div>'+
+      '<div class="hsp"><div class="hv">'+fmtClock(nightDur)+'</div><div class="ht">ночной сон</div></div>'+
+      '<div class="hsp"><div class="hv">'+dayLogs.length+'</div><div class="ht">снов</div></div>'+
+      '</div>';
+
+    // Записи дня с ВБ между снами
+    const wakeForDay=d===0?morningWake:null;
+    if(wakeForDay){
+      html+='<div class="hist-item">☀️ <span>Подъём '+fmtT(wakeForDay)+'</span>'+
+        '<span class="edit-link" onclick="editLog(\"morning\")">✏️</span></div>';
+    }
+    if(nightLog&&nightLog.end){
+      html+='<div class="hist-item">🌑 <span>Ночь '+fmtT(nightLog.start)+'–'+fmtT(nightLog.end)+
+        ' ('+fmtDur((nightLog.end-nightLog.start)/60000)+')</span>'+
+        '<span class="edit-link" onclick="editLog('+nightLog.id+')">✏️</span></div>';
+    }
+    dayLogs.forEach((l,i)=>{
+      const dur=(l.end-l.start)/60000;
+      const fe=l.moodFall?FE[l.moodFall]:'',we=l.moodWake?WE[l.moodWake]:'';
+      const wbBefore=i===0&&wakeForDay?(l.start-wakeForDay)/60000:i>0?(l.start-dayLogs[i-1].end)/60000:0;
+      if(wbBefore>2)html+='<div class="hist-wb">⏱ ВБ '+fmtDur(wbBefore)+'</div>';
+      html+='<div class="hist-item"><div class="ficon fi-d" style="width:28px;height:28px;font-size:14px;flex-shrink:0">🌙</div>'+
+        '<div class="fmain"><div class="ft">'+(i+1)+'-й сон · '+fmtDur(dur)+
+        (dur<60?' <span class="tag warn">кор.</span>':'')+' '+fe+we+'</div>'+
+        '<div class="fs">'+fmtT(l.start)+' – '+fmtT(l.end)+
+        (l.fallDuration?' · укл.'+l.fallDuration+'мин':'')+
+        (l.place?' · '+(PLN[l.place]||''):'')+'</div>'+
+        (l.wbComment?'<div class="fcmt">💬 '+l.wbComment+'</div>':'')+
+        '</div><span class="edit-link" onclick="editLog('+l.id+')">✏️</span></div>';
+    });
+    html+='</div>';
+  }
+  content.innerHTML=html||'<div class="sub">Нет данных за последние 7 дней</div>';
+}
+
+function editLog(id){
+  if(id==='morning'){
+    document.getElementById('edit-title').textContent='Время подъёма';
+    const d=new Date(morningWake);
+    document.getElementById('edit-start').value=pad(d.getHours())+':'+pad(d.getMinutes());
+    document.getElementById('edit-end').value='';document.getElementById('edit-end').style.display='none';
+    document.getElementById('edit-date').value=dateStr(morningWake);
+    document.getElementById('edit-cmt').value='';
+    editingLogId='morning';
+    document.getElementById('editOv').classList.add('show');return;
+  }
+  document.getElementById('edit-end').style.display='';
+  const l=logs.find(x=>x.id===id);if(!l)return;
+  editingLogId=id;
+  document.getElementById('edit-title').textContent='Редактировать сон';
+  const ds=new Date(l.start),de=new Date(l.end);
+  document.getElementById('edit-start').value=pad(ds.getHours())+':'+pad(ds.getMinutes());
+  document.getElementById('edit-end').value=pad(de.getHours())+':'+pad(de.getMinutes());
+  document.getElementById('edit-date').value=dateStr(l.start);
+  document.getElementById('edit-cmt').value=l.wbComment||'';
+  document.getElementById('editOv').classList.add('show');
+}
+function saveEdit(){
+  if(editingLogId==='morning'){
+    const dateVal=document.getElementById('edit-date').value;
+    const timeVal=document.getElementById('edit-start').value;
+    if(!timeVal)return;
+    const[h,m]=timeVal.split(':').map(Number);
+    const d=new Date(dateVal+'T00:00:00');d.setHours(h,m,0,0);
+    morningWake=d.getTime();if(profile)profile.autoMorning=false;saveProfile();
+  }else{
+    const l=logs.find(x=>x.id===editingLogId);if(!l)return;
+    const dateVal=document.getElementById('edit-date').value;
+    const sv=document.getElementById('edit-start').value;
+    const ev=document.getElementById('edit-end').value;
+    const cmt=document.getElementById('edit-cmt').value.trim();
+    if(sv){const[h,m]=sv.split(':').map(Number);const d=new Date(dateVal+'T00:00:00');d.setHours(h,m,0,0);l.start=d.getTime();}
+    if(ev){const[h,m]=ev.split(':').map(Number);const d=new Date(dateVal+'T00:00:00');d.setHours(h,m,0,0);l.end=d.getTime();}
+    if(cmt)l.wbComment=cmt;
+  }
+  saveData();document.getElementById('editOv').classList.remove('show');
+  renderAll();
+}
+function deleteLog(){
+  if(editingLogId==='morning'){morningWake=null;}
+  else{logs=logs.filter(x=>x.id!==editingLogId);}
+  saveData();document.getElementById('editOv').classList.remove('show');renderAll();
+}
+
+/* ══ ЭКСПОРТ EXCEL ══ */
+async function exportHistory(){
+  // Загружаем SheetJS если ещё не загружен
+  if(typeof XLSX==='undefined'){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      s.onload=res;s.onerror=rej;document.head.appendChild(s);
+    });
+  }
+  const n=norm();
+  const wb=XLSX.utils.book_new();
+
+  // ── Лист 1: Дневник снов ──
+  const hdr=[
+    'Дата','День недели','Тип сна',
+    'Начало','Конец','Длительность (мин)',
+    'Место','Укладывание (мин)','Засыпание (А)',
+    'Настроение до сна (Б)','Пробуждение (Г)','Комментарий о ВБ'
+  ];
+  const DAYS=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  const FALL_RU={calm:'Спокойно',fussy:'Капризничал',crying:'Протест/плач'};
+  const WBEND_RU={tired:'Показывал усталость',fussy:'Капризный',active:'Бодрый'};
+  const WAKE_RU={happy:'Весёлый',neutral:'Нейтрально',fussy:'Капризный'};
+  const PLACE_RU_EX={crib:'Кроватка',cosleep:'Совместный сон',arms:'На руках',breast:'На груди',self:'Сам',stroller:'Коляска'};
+
+  const sorted=[...logs].filter(l=>l.end).sort((a,b)=>a.start-b.start);
+  const dataRows=sorted.map(l=>{
+    const d=new Date(l.start);
+    const dur=Math.round((l.end-l.start)/60000);
+    return [
+      dateStr(l.start), DAYS[d.getDay()],
+      isNightSleep(l)?'Ночной':'Дневной',
+      fmtT(l.start), fmtT(l.end), dur,
+      l.place?(PLACE_RU_EX[l.place]||''):'',
+      l.fallDuration||'',
+      l.moodFall?(FALL_RU[l.moodFall]||''):'',
+      l.wbEnd?(WBEND_RU[l.wbEnd]||''):'',
+      l.moodWake?(WAKE_RU[l.moodWake]||''):'',
+      l.wbComment||''
+    ];
+  });
+  const ws1=XLSX.utils.aoa_to_sheet([hdr,...dataRows]);
+  // Ширины столбцов
+  ws1['!cols']=[
+    {wch:12},{wch:8},{wch:10},{wch:8},{wch:8},{wch:14},
+    {wch:14},{wch:12},{wch:14},{wch:18},{wch:12},{wch:30}
+  ];
+  XLSX.utils.book_append_sheet(wb,ws1,'Дневник снов');
+
+  // ── Лист 2: Сводка по дням с ВБ ──
+  const hdr2=['Дата','День','Подъём','Кол-во снов','ВБ1','ВБ2','ВБ3','ВБ4','ВБ5',
+    'Сумм. дн. сон (мин)','Ночной сон (мин)','Итого сна (мин)',
+    'Норма ДС мин ('+fmtClock(n.ds[0])+'–'+fmtClock(n.ds[1])+')',
+    'Норма НС мин ('+fmtClock(n.ns[0])+'–'+fmtClock(n.ns[1])+')',
+    'Норма итого мин','Пробуждений ночью','Ночное гуляние'];
+  const summaryRows=[];
+  const today=new Date();
+  for(let d=6;d>=0;d--){
+    const date=new Date(today);date.setDate(date.getDate()-d);date.setHours(0,0,0,0);
+    const dstr=dateStr(date.getTime());
+    const dl=getLogsForDate(dstr).sort((a,b)=>a.start-b.start);
+    const nl=getNightForDate(dstr);
+    const wake=d===0?morningWake:null;
+    let ds_min=0;dl.forEach(l=>ds_min+=(l.end-l.start)/60000);
+    const ns_min=nl?((nl.end-nl.start)/60000):0;
+
+    // ВБ между снами
+    const wbs=[];
+    dl.forEach((l,i)=>{
+      let wbBef=0;
+      if(i===0&&wake) wbBef=(l.start-wake)/60000;
+      else if(i>0) wbBef=(l.start-dl[i-1].end)/60000;
+      if(wbBef>0) wbs.push(fmtClock(wbBef));
+    });
+    while(wbs.length<5)wbs.push('');
+
+    // Ночные данные (только сегодня)
+    const nwCount=d===0&&nightData?nightData.count:'';
+    const nwWalk=d===0&&nightData?(nightData.walk==='yes'?'Да':'Нет'):'';
+
+    summaryRows.push([
+      dstr, DAYS[date.getDay()],
+      wake?fmtT(wake):'', dl.length,
+      ...wbs.slice(0,5),
+      Math.round(ds_min), Math.round(ns_min), Math.round(ds_min+ns_min),
+      n.ds[0]+' – '+n.ds[1], n.ns[0]+' – '+n.ns[1], n.tot[0]+' – '+n.tot[1],
+      nwCount, nwWalk
+    ]);
+  }
+  const ws2=XLSX.utils.aoa_to_sheet([hdr2,...summaryRows]);
+  ws2['!cols']=[
+    {wch:12},{wch:6},{wch:8},{wch:8},
+    {wch:7},{wch:7},{wch:7},{wch:7},{wch:7},
+    {wch:14},{wch:14},{wch:14},
+    {wch:16},{wch:16},{wch:12},
+    {wch:14},{wch:14}
+  ];
+  XLSX.utils.book_append_sheet(wb,ws2,'Сводка по дням');
+
+  XLSX.writeFile(wb,'sonny_дневник.xlsx');
+}
+
+/* ══ ПЛАН ══ */
+function buildPlan(){
+  const n=norm(),a=ageMonths();
+  const wake=morningWake||(()=>{const d=new Date();d.setHours(7,0,0,0);return d.getTime();})();
+  if(a<=3){
+    const nightLen=10*60,dayMin=24*60-nightLen;
+    const wbA=Math.round((n.wb[0]+n.wb[1])/2),nlA=Math.round((n.nl[0]+n.nl[1])/2);
+    const napsC=Math.min(n.naps[1],Math.max(n.naps[0],Math.floor(dayMin/(wbA+nlA))));
+    let rows=[],cur=wake;rows.push({t:cur,lab:'☀️ Подъём',type:'w'});
+    for(let i=0;i<napsC;i++){const tw=i===0?Math.round(wbA*.85):wbA;cur+=tw*60000;
+      const tl=i>=napsC-2?Math.max(n.nl[0],Math.round(nlA*.6)):nlA;
+      rows.push({t:cur,lab:'🌙 '+(i+1)+'-й сон · '+fmtDur(tl),type:'s'});cur+=tl*60000;}
+    cur+=Math.round(wbA*1.1)*60000;
+    const min9=wake+(a<=1?9:10)*3600000,min12=wake+12*3600000;
+    let warn12=false;if(cur<Math.max(min9,min12)){cur=Math.max(min9,min12);warn12=true;}
+    rows.push({t:cur,lab:'🌑 Уход в ночь',type:'n'});
+    return{rows,warn12,isNewborn:true};
+  }
+  const naps=n.naps[0],nlM=Math.round((n.nl[0]+n.nl[1])/2);
+  let nls=naps===0?[]:naps===1?[Math.min(180,nlM)]:
+    naps===2?[Math.min(120,Math.round(nlM*1.2)),Math.max(40,Math.round(nlM*.7))]:
+    [Math.min(120,Math.round(nlM*1.3)),...Array(Math.max(0,naps-2)).fill(nlM),40];
+  let wbs=[wbFirst(n)];for(let i=1;i<naps;i++)wbs.push(wbMid(n));wbs.push(wbLast(n));
+  let rows=[],cur=wake;rows.push({t:cur,lab:'☀️ Подъём',type:'w'});
+  for(let i=0;i<naps;i++){cur+=wbs[i]*60000;
+    rows.push({t:cur,lab:'🌙 '+(naps===1?'Дневной сон':(i+1)+'-й сон')+' · '+fmtDur(nls[i]),type:'s'});
+    cur+=nls[i]*60000;}
+  cur+=wbs[naps]*60000;
+  const min12=wake+12*3600000;let warn12=false;
+  if(cur<min12){cur=min12;warn12=true;}
+  rows.push({t:cur,lab:'🌑 Уход в ночь',type:'n'});return{rows,warn12};
+}
+
+function renderPlan(){
+  const n=norm();
+  document.getElementById('plan-age').textContent='· '+n.lb;
+  const plan=buildPlan();let html='';
+  plan.rows.forEach(r=>{
+    const cls=r.type==='w'?'pb-w':r.type==='n'?'pb-n':'pb-s';
+    html+='<div class="plan-row"><div class="plan-time">'+fmtT(r.t)+'</div><div class="plan-bar '+cls+'"></div><div class="plan-lab">'+r.lab+'</div></div>';
+  });
+  if(plan.warn12)html+='<div class="notice info" style="margin-top:7px">⚠️ Ночь сдвинута — нужно ≥12 ч от подъёма.</div>';
+  if(plan.isNewborn)html+='<div class="notice tip" style="margin-top:7px">👶 До 4 мес — ритмичный режим. Ориентируйтесь на признаки усталости.</div>';
+  document.getElementById('planlist').innerHTML=html;
+
+  const wT=fmtClock(n.wb[0])+(n.wb[1]>n.wb[0]?' – '+fmtClock(n.wb[1]):'');
+  const nC=n.naps[0]===n.naps[1]?String(n.naps[0]):n.naps[0]+'–'+n.naps[1];
+  const nLT=fmtClock(n.nl[0])+(n.nl[1]>n.nl[0]?' – '+fmtClock(n.nl[1]):'');
+  document.getElementById('normtab').innerHTML=
+    '<tr><td>Время бодрствования (ВБ)</td><td>'+wT+'</td></tr>'+
+    '<tr><td>Первое ВБ утром</td><td>~'+fmtClock(wbFirst(n))+'</td></tr>'+
+    '<tr><td>Дневных снов</td><td>'+nC+'</td></tr>'+
+    '<tr><td>Длина одного ДС</td><td>'+nLT+'</td></tr>'+
+    '<tr><td>Суммарный дневной сон</td><td>'+fmtClock(n.ds[0])+' – '+fmtClock(n.ds[1])+'</td></tr>'+
+    '<tr><td>Ночной сон</td><td>'+fmtClock(n.ns[0])+' – '+fmtClock(n.ns[1])+'</td></tr>'+
+    '<tr><td>Итого сна в сутки</td><td>'+fmtClock(n.tot[0])+' – '+fmtClock(n.tot[1])+'</td></tr>'+
+    '<tr><td>СБ (спокойное ВБ)</td><td>40% от ВБ / за 20 мин до сна</td></tr>'+
+    '<tr><td>Ритуал</td><td>за 10–15 мин до сна</td></tr>';
+}
+
+function makeStars(){
+  const box=document.getElementById('stars');if(box.children.length)return;
+  for(let i=0;i<12;i++){const s=document.createElement('i');s.style.left=(5+Math.random()*90)+'%';s.style.top=(5+Math.random()*85)+'%';s.style.animationDelay=(Math.random()*2.5)+'s';box.appendChild(s);}
+}
+function toggleHow(){const t=document.getElementById('how-t'),b=document.getElementById('how-b');t.classList.toggle('open');b.classList.toggle('show');}
+function toggleArchDetail(id){
+  const ids=['formula','ritual','signals'];
+  ids.forEach(k=>{
+    const el=document.getElementById('arch-'+k);
+    if(el){
+      if(k===id) el.classList.toggle('show');
+      else el.classList.remove('show');
+    }
+  });
+}
+function toggleArch(){const h=document.getElementById('arch-hdr'),b=document.getElementById('arch-body');h.classList.toggle('open');b.classList.toggle('show');}
+
+/* ══ МОДАЛКА УКЛАДЫВАНИЯ ══ */
+const FALL_H={calm:'Уснул спокойно — ВБ скорее всего подходит.',fussy:'Капризы при укладывании. Укажите настроение ДО сна (параметр Б) — это важно для точного вывода.',crying:'Протест и плач — признак перегула. Сократите ВБ на 15 мин.'};
+function openFall(){
+  selFall=null;selWbEnd=null;selPlace=null;
+  document.querySelectorAll('#fall-row .m3').forEach(m=>m.className='m3');
+  document.querySelectorAll('#wbend-row .m3').forEach(m=>m.className='m3');
+  document.querySelectorAll('#place-row .pp').forEach(p=>p.classList.remove('sel'));
+  document.getElementById('fall-hint').className='mhint';
+  document.getElementById('fall-dur').value='';
+  document.getElementById('fall-dur-hint').style.display='none';
+  document.getElementById('wbend-wrap').classList.add('hidden');
+  document.getElementById('fallOv').classList.add('show');
+}
+function closeFall(){document.getElementById('fallOv').classList.remove('show');renderAll();}
+function pFall(el){
+  selFall=el.dataset.v;
+  document.querySelectorAll('#fall-row .m3').forEach(m=>m.className='m3');
+  el.classList.add(selFall==='calm'?'sg':'sb');
+  const h=document.getElementById('fall-hint');h.textContent=FALL_H[selFall]||'';h.className='mhint show';
+  document.getElementById('wbend-wrap').classList.toggle('hidden',selFall==='calm');
+}
+function pWbEnd(el){
+  selWbEnd=el.dataset.v;
+  document.querySelectorAll('#wbend-row .m3').forEach(m=>m.className='m3');
+  el.classList.add(selWbEnd==='active'?'sg':selWbEnd==='fussy'?'sb':'so');
+}
+function onFallDur(){
+  const v=parseInt(document.getElementById('fall-dur').value);
+  const box=document.getElementById('fall-dur-hint');if(!v||v<=0){box.style.display='none';return;}
+  let text,bg,color;
+  if(v<5){text='Засыпание <5 мин — возможен сильный перегул.';bg='var(--warn)';color='var(--wi)';}
+  else if(v<=20){text='В норме ✅';bg='var(--ms)';color='#3E6E5C';}
+  else if(v<=35){text='Чуть больше нормы. Смотрим настроение.';bg='var(--tip)';color='var(--ti)';}
+  else{text='>35 мин — сигнал. Капризы → сократить ВБ. Спокойный → увеличить ВБ.';bg='var(--warn)';color='var(--wi)';}
+  box.textContent=text;box.style.background=bg;box.style.color=color;box.style.display='block';
+}
+function pPlace(el){selPlace=el.dataset.v;document.querySelectorAll('#place-row .pp').forEach(p=>p.classList.remove('sel'));el.classList.add('sel');}
+function saveFall(){
+  if(sleeping){sleeping.moodFall=selFall;sleeping.wbEnd=selWbEnd;sleeping.fallDuration=parseInt(document.getElementById('fall-dur').value)||null;sleeping.place=selPlace;}
+  saveData();document.getElementById('fallOv').classList.remove('show');renderAll();
+}
+
+/* ══ МОДАЛКА ПРОБУЖДЕНИЯ ══ */
+const WAKE_H={happy:'Проснулся весёлым — малыш выспался! ВБ подходит.',neutral:'Нейтральное пробуждение. Наблюдайте за настроением в ВБ.',fussy:''};
+let wakeDur=0;
+function openWake(dur,isNight){wakeDur=dur||0;selWake=null;
+  document.querySelectorAll('#wake-row .m3').forEach(m=>m.className='m3');
+  document.getElementById('wake-hint').className='mhint';
+  document.getElementById('wb-cmt').value='';
+  document.getElementById('wakeOv').classList.add('show');
+}
+function closeWake(){document.getElementById('wakeOv').classList.remove('show');pendingWakeId=null;renderAll();}
+function pWake(el){
+  selWake=el.dataset.v;
+  document.querySelectorAll('#wake-row .m3').forEach(m=>m.className='m3');
+  el.classList.add(selWake==='happy'?'sg':selWake==='fussy'?'sb':'so');
+  const h=document.getElementById('wake-hint');
+  let text=WAKE_H[selWake]||'';
+  if(selWake==='fussy')text=wakeDur<60?'Капризное + короткий сон (<60 мин) — перегул или регресс. Продлите следующий, сократите ВБ.':'Капризничал, хотя поспал хорошо — сонная ассоциация, не ВБ.';
+  h.textContent=text;h.className='mhint show';
+}
+function saveWake(){
+  if(pendingWakeId){const l=logs.find(x=>x.id===pendingWakeId);if(l){l.moodWake=selWake;const c=document.getElementById('wb-cmt').value.trim();if(c)l.wbComment=c;}saveData();}
+  pendingWakeId=null;document.getElementById('wakeOv').classList.remove('show');renderAll();
+}
+
+/* ══ НОЧНЫЕ ПРОБУЖДЕНИЯ ══ */
+function pNwCnt(el){selNwCnt=el.dataset.v;document.querySelectorAll('#nw-cnt .pp').forEach(p=>p.classList.remove('sel'));el.classList.add('sel');updateNwHint();}
+function pNwWalk(el){selNwWalk=el.dataset.v;document.querySelectorAll('#nw-walk .pp').forEach(p=>p.classList.remove('sel'));el.classList.add('sel');updateNwHint();}
+function updateNwHint(){
+  const box=document.getElementById('nw-hint');let text='',show=false;
+  if(selNwWalk==='yes'){text='Гуляние >30 мин = ВБ за сутки. Проверьте баланс дневного сна.';show=true;box.style.background='var(--warn)';box.style.color='var(--wi)';}
+  else if(selNwCnt>='4'){text='4+ пробуждений — сонная ассоциация или недосып. Спросите Сонни.';show=true;box.style.background='var(--warn)';box.style.color='var(--wi)';}
+  else if(selNwCnt==='0'){text='Отличная ночь без пробуждений! 🌟';show=true;box.style.background='var(--ms)';box.style.color='#3E6E5C';}
+  box.textContent=text;box.style.display=show?'block':'none';
+}
+function saveNight(){
+  nightData={count:selNwCnt,walk:selNwWalk,ts:Date.now()};
+  selNwCnt=null;selNwWalk=null;
+  document.querySelectorAll('#nw-cnt .pp,#nw-walk .pp').forEach(p=>p.classList.remove('sel'));
+  document.getElementById('nw-hint').style.display='none';
+  document.getElementById('nightOv').classList.remove('show');
+  saveData();renderAll();
+}
+
+/* ══ ВРЕМЯ ══ */
+function askTime(kind){
+  timeCtx=kind;
+  const titles={morning:'Утренний подъём',sleep:'Малыш засыпает',wake:'Малыш проснулся',fixstart:'Время засыпания'};
+  document.getElementById('time-title').textContent=titles[kind];
+  document.getElementById('time-lbl').textContent='Проверьте — можно поправить';
+  document.getElementById('time-input').style.borderColor='';
+  const d=new Date();document.getElementById('time-input').value=pad(d.getHours())+':'+pad(d.getMinutes());
+  document.getElementById('timeOv').classList.add('show');
+}
+function confirmTime(){
+  const v=document.getElementById('time-input').value;if(!v)return;
+  const[h,m]=v.split(':').map(Number);const d=new Date();d.setHours(h,m,0,0);let ts=d.getTime();
+  if(timeCtx==='sleep'&&ts>Date.now())ts-=86400000;
+  if(timeCtx==='wake'&&sleeping&&ts<sleeping.start)ts+=86400000;
+  if(timeCtx==='morning'&&profile)profile.autoMorning=false;
+  document.getElementById('timeOv').classList.remove('show');
+  if(timeCtx==='morning')setMorning(ts);
+  else if(timeCtx==='sleep')startSleep(ts);
+  else if(timeCtx==='wake')endSleep(ts);
+  else if(timeCtx==='fixstart'&&sleeping){sleeping.start=ts;saveData();renderAll();}
+}
+
+/* ══ ВКЛАДКИ ══ */
+function switchTab(name,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(name==='plan')renderPlan();
+  if(name==='history')renderHistory();
+}
+
+/* ══ ЧАТ ══ */
+function buildPrompt(){
+  const a=ageMonths(),n=norm();
+  const t=todayDayLogs(),night=todayNightLog();const d=dayTotals();
+  const reg=REGRESSIONS.find(r=>a>=r.m[0]&&a<=r.m[1]);
+  let diary=morningWake?'Подъём '+fmtT(morningWake)+'. ':'Утро не отмечено. ';
+  if(nightData)diary+='Ночь: '+(nightData.count==='0'?'без пробужд.':nightData.count+' пробужд.')+(nightData.walk==='yes'?'+гуляние>30мин':'')+'. ';
+  if(night&&night.end)diary+='НС: '+fmtT(night.start)+'–'+fmtT(night.end)+' ('+fmtDur((night.end-night.start)/60000)+'). ';
+  const FT={calm:'спокойно',fussy:'капризничал',crying:'протест/плач'};
+  const WT={tired:'показывал усталость',fussy:'капризный',active:'бодрый'};
+  const MW={happy:'весёлый',neutral:'нейтрально',fussy:'капризный'};
+  t.forEach((l,i)=>{
+    if(!l.end)return;
+    const dur=(l.end-l.start)/60000;
+    diary+='ДС'+(i+1)+': '+fmtT(l.start)+'–'+fmtT(l.end)+' ('+fmtDur(dur)+
+      (l.moodFall?', '+FT[l.moodFall]:'')+
+      (l.fallDuration?', укл.'+l.fallDuration+'мин':'')+
+      (l.wbEnd?', до сна: '+WT[l.wbEnd]:'')+
+      (l.moodWake?', проснулся '+MW[l.moodWake]:'')+
+      (dur<60?' [КОР.]':'')+
+      (l.wbComment?', ВБ: '+l.wbComment:'')+
+      '). ';
+  });
+  if(sleeping)diary+='Сейчас спит с '+fmtT(sleeping.start)+(isCurrentNight()?' (ночь)':' (день)')+'. ';
+  diary+='ДС итого: '+fmtClock(d.ds)+'.';
+  const calib=analyzeCalib();
+  let calibInfo='';
+  if(calib&&calib.perNap.length){
+    calibInfo='\nАНАЛИЗ: ';
+    calib.perNap.forEach(({results})=>{results&&results.forEach(r=>{calibInfo+=r.icon+' '+r.text+(r.action?' → '+r.action:'')+'. ';});});
+    if(calib.summary)calibInfo+='\nИТОГ: '+calib.summary.text;
+  }
+  const regInfo=reg?('\nВОЗМОЖЕН '+reg.name+'. '+reg.cause+' Советы: '+reg.tips.join('; ')):'' ;
+  const eodInfo=eodFeedback[todayStr()]?('\nОБРАТНАЯ СВЯЗЬ СЕГОДНЯ: мама сказала «'+eodFeedback[todayStr()]+'» на итоговые рекомендации.'):'';
+
+  return `Ты — Сонни, тёплый консультант по детскому сну (0–3 года). Только мягкие методики. Никакого cry it out.
+
+МЕТОДИКА:
+- ВБ — МАКСИМУМ после снов >1 ч. После коротких снов (<60 мин) ВБ сокращается на 5–15%.
+- Первое ВБ всегда короче (~15–20%). ВБ нарастает к вечеру.
+- До 3 мес — всё ВБ спокойно, режим ритмичный, подъём не фиксируем.
+- С 4 мес: считаем среднее подъёма за 4–7 дней → фиксируем. Сны по биоритмам.
+- АБ/СБ = 60/40. За 20 мин — СБ, за 10–15 мин — ритуал.
+- Последнее ВБ перед ночью = среднее ВБ +10–15%.
+- Ночное гуляние >30 мин = ВБ. Правило 12 ч: ночь не раньше 12 ч от подъёма. Ночь до 21:00.
+- Коррекция: один отрезок ВБ за раз, не более 20–30 мин изменений.
+- Если не указана длительность укладывания — считаем в норме (до 20 мин).
+
+ТАБЛИЦА А+Б+В+Г:
+- Спокойно + усталый/норм + укл.≤20мин → ВБ норма
+- Спокойно + бодрый + укл.>20мин → недогул, +10–15 мин ВБ
+- Капризил + беспокойный + → перегул, -10–15 мин ВБ + СБ
+- Капризил + бодрый → проверяем: успокоился = недогул, нет = перевозбуждение
+- Протест/плач → перегул, -15 мин ВБ
+- Проснулся кап. + кор. сон (<60мин) → перегул/регресс, продлевать + -ВБ
+- Проснулся кап. + длинный → сонная ассоциация
+
+НОРМЫ ${a} мес (${n.lb}): ВБ ${fmtClock(n.wb[0])}–${fmtClock(n.wb[1])} (первое ~${fmtClock(wbFirst(n))}), ДС ${fmtClock(n.ds[0])}–${fmtClock(n.ds[1])}, снов ${n.naps[0]===n.naps[1]?n.naps[0]:n.naps[0]+'–'+n.naps[1]}, НС ${fmtClock(n.ns[0])}–${fmtClock(n.ns[1])}.
+РЕБЁНОК: ${profile?profile.name:'малыш'}, ${a} мес${profile&&profile.dueDate?' (скорр.)':''}.
+ДНЕВНИК: ${diary}${calibInfo}${regInfo}${eodInfo}
+
+ПРАВИЛА: тепло, на «вы». Конкретные времена. Объясняй ПОЧЕМУ. Хвали маму за прогресс. При вопросах о здоровье → педиатр. Безоп. сон: кроватка, на спине, без подушек до 1 года.`;
+}
+
+function addMsg(text,who){
+  const log=document.getElementById('chatlog');const div=document.createElement('div');
+  div.className='msg '+who;div.textContent=text;log.appendChild(div);log.scrollTop=log.scrollHeight;return div;
+}
+function quick(el){document.getElementById('ci').value=el.textContent;sendChat();}
+async function sendChat(){
+  const inp=document.getElementById('ci');const text=inp.value.trim();if(!text)return;
+  inp.value='';document.getElementById('chips').style.display='none';
+  addMsg(text,'user');chatHistory.push({role:'user',content:text});
+  const typing=addMsg('Сонни печатает…','bot');typing.classList.add('typing');
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:buildPrompt(),messages:chatHistory.slice(-12)})
+    });
+    const data=await resp.json();
+    const reply=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim()||'Не получилось ответить 💛 Попробуйте ещё раз';
+    typing.classList.remove('typing');typing.textContent=reply;
+    chatHistory.push({role:'assistant',content:reply});
+  }catch(e){typing.classList.remove('typing');typing.textContent='Нет связи. Попробуйте ещё раз.';}
+  document.getElementById('chatlog').scrollTop=1e9;
+}
+
+(async function init(){await loadAll();if(profile)document.getElementById('onboard').classList.add('hidden');renderAll();})();
+</script>
+</body>
+</html>
