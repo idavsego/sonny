@@ -1,0 +1,17 @@
+{
+  "name": "sonny-chat-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Бэкенд для чата приложения Сонни: держит ключ Anthropic на сервере",
+  "main": "chat.mjs",
+  "scripts": {
+    "start": "node chat.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.131.0"
+  }
+}

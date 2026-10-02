@@ -611,6 +611,20 @@ const REGRESSIONS=[
    tips:['Давать выбор в ритуале','Чёткие границы + предсказуемость','Дневной сон сохранять','Пройдёт за 4–8 недель']},
 ];
 
+/* ══ НАСТРОЙКИ ══ */
+/* CHAT_URL — адрес своего бэкенда, который разговаривает с моделью.
+   Ключ лежит ТОЛЬКО на сервере: в этом файле его держать нельзя — его увидит
+   любой, кто откроет исходник страницы. Как поднять бэкенд — server/README.md.
+   Пустая строка: внутри песочницы Claude запрос уйдёт напрямую (окружение
+   подставит авторизацию само), в обычном браузере чат честно скажет, что
+   не настроен, вместо «нет связи». */
+const CONFIG={
+  CHAT_URL:'',
+  MODEL:'claude-opus-5-5',
+  MAX_TOKENS:2000
+};
+const inClaudeSandbox=!!(window.storage&&window.storage.get);
+
 /* ══ СОСТОЯНИЕ ══ */
 let profile=null, logs=[], sleeping=null, morningWake=null, chatHistory=[];
 let nightData=null, pendingWakeId=null;
@@ -620,10 +634,33 @@ let editingLogId=null;
 let eodFeedback={}; // {date: 'yes'|'no'}
 
 /* ══ ХРАНИЛИЩЕ ══ */
+/* Своё хранилище, не зависящее от песочницы.
+   Основное — localStorage: работает в любом браузере и на любом хостинге.
+   Если приложение раньше запускалось в песочнице Claude (window.storage),
+   данные оттуда читаются один раз и переносятся в localStorage, чтобы
+   уже накопленный дневник не потерялся. */
+const store={
+  async get(k){
+    try{const v=localStorage.getItem(k);if(v!==null)return v;}catch(e){}
+    if(window.storage&&window.storage.get){
+      try{
+        const r=await window.storage.get(k);
+        if(r&&r.value!=null){try{localStorage.setItem(k,r.value);}catch(e){}return r.value;}
+      }catch(e){}
+    }
+    return null;
+  },
+  async set(k,v){
+    try{localStorage.setItem(k,v);return true;}catch(e){}
+    if(window.storage&&window.storage.set){try{await window.storage.set(k,v);return true;}catch(e){}}
+    return false;
+  }
+};
+
 async function loadAll(){
-  try{const p=await window.storage.get('sonny:profile');profile=JSON.parse(p.value);}catch(e){profile=null;}
+  try{const p=await store.get('sonny:profile');profile=p?JSON.parse(p):null;}catch(e){profile=null;}
   try{
-    const d=await window.storage.get('sonny:data8');const o=JSON.parse(d.value);
+    const d=await store.get('sonny:data8');const o=d?JSON.parse(d):{};
     logs=o.logs||[];sleeping=o.sleeping||null;morningWake=o.morningWake||null;
     nightData=o.nightData||null;eodFeedback=o.eodFeedback||{};
     const today=todayStr();
@@ -637,9 +674,9 @@ async function loadAll(){
   }catch(e){}
 }
 async function saveData(){
-  try{await window.storage.set('sonny:data8',JSON.stringify({logs,sleeping,morningWake,nightData,eodFeedback}));}catch(e){}
+  try{await store.set('sonny:data8',JSON.stringify({logs,sleeping,morningWake,nightData,eodFeedback}));}catch(e){}
 }
-async function saveProfile(){try{await window.storage.set('sonny:profile',JSON.stringify(profile));}catch(e){}}
+async function saveProfile(){try{await store.set('sonny:profile',JSON.stringify(profile));}catch(e){}}
 
 /* ══ УТИЛИТЫ ══ */
 const pad=n=>String(n).padStart(2,'0');
@@ -1570,16 +1607,30 @@ async function sendChat(){
   inp.value='';document.getElementById('chips').style.display='none';
   addMsg(text,'user');chatHistory.push({role:'user',content:text});
   const typing=addMsg('Сонни печатает…','bot');typing.classList.add('typing');
+  if(!CONFIG.CHAT_URL&&!inClaudeSandbox){
+    typing.classList.remove('typing');
+    typing.textContent='Чат пока не подключён 💛 Трекер и режим работают, а для ответов Сонни нужно указать CHAT_URL в настройках приложения.';
+    chatHistory.pop();
+    document.getElementById('chatlog').scrollTop=1e9;return;
+  }
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+    const url=CONFIG.CHAT_URL||'https://api.anthropic.com/v1/messages';
+    const payload={model:CONFIG.MODEL,max_tokens:CONFIG.MAX_TOKENS,system:buildPrompt(),messages:chatHistory.slice(-12)};
+    const resp=await fetch(url,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:buildPrompt(),messages:chatHistory.slice(-12)})
+      body:JSON.stringify(payload)
     });
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
     const data=await resp.json();
+    if(data.stop_reason==='refusal'){
+      typing.classList.remove('typing');
+      typing.textContent='На такой вопрос не отвечу 💛 Если он про здоровье малыша — лучше к педиатру.';
+      chatHistory.pop();document.getElementById('chatlog').scrollTop=1e9;return;
+    }
     const reply=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim()||'Не получилось ответить 💛 Попробуйте ещё раз';
     typing.classList.remove('typing');typing.textContent=reply;
     chatHistory.push({role:'assistant',content:reply});
-  }catch(e){typing.classList.remove('typing');typing.textContent='Нет связи. Попробуйте ещё раз.';}
+  }catch(e){typing.classList.remove('typing');typing.textContent='Нет связи. Попробуйте ещё раз.';chatHistory.pop();}
   document.getElementById('chatlog').scrollTop=1e9;
 }
 
