@@ -11,6 +11,12 @@
 import http from 'node:http';
 import Anthropic from '@anthropic-ai/sdk';
 
+// Читаем .env, если он есть рядом (Node 20.12+). Без этого ключ из .env
+// не подхватится и сервер не стартует.
+if (typeof process.loadEnvFile === 'function') {
+  try { process.loadEnvFile(); } catch { /* .env может отсутствовать — это нормально */ }
+}
+
 const PORT = Number(process.env.PORT || 8787);
 
 // Откуда разрешено обращаться. Через запятую, например:
@@ -22,6 +28,10 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '*')
 // Модели, которые разрешено запрашивать. Клиент не может попросить ничего
 // другого — иначе чужой скрипт сможет гонять через твой ключ что угодно.
 const ALLOWED_MODELS = new Set(['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-4-5']);
+
+// Доверять заголовку X-Forwarded-For можно ТОЛЬКО если перед сервером стоит
+// твой nginx: иначе любой клиент подставит чужой адрес и обойдёт лимит.
+const TRUST_PROXY = process.env.TRUST_PROXY === '1';
 
 const MAX_BODY_BYTES = 128 * 1024;   // защита от гигантских запросов
 const MAX_OUTPUT_TOKENS = 4000;
@@ -52,6 +62,14 @@ setInterval(() => {
   for (const [ip, rec] of hits) if (now - rec.start > RATE_LIMIT.windowMs) hits.delete(ip);
 }, 5 * 60_000).unref();
 
+/* Разрешён ли источник. Пока ALLOWED_ORIGINS='*' — пускаем всех (отладка).
+   Как только перечислены домены, запрос с чужого или вовсе без Origin
+   отклоняется ДО обращения к модели: иначе чужой скрипт тратит твой ключ. */
+function originAllowed(origin) {
+  if (ALLOWED_ORIGINS.includes('*')) return true;
+  return !!origin && ALLOWED_ORIGINS.includes(origin);
+}
+
 function corsHeaders(origin) {
   const allow = ALLOWED_ORIGINS.includes('*')
     ? '*'
@@ -73,15 +91,23 @@ function send(res, status, body, origin) {
 
 function readBody(req) {
   return new Promise((resolve, reject) => {
-    let size = 0;
+    let size = 0, done = false;
     const chunks = [];
     req.on('data', c => {
+      if (done) return;
       size += c.length;
-      if (size > MAX_BODY_BYTES) { reject(new Error('too large')); req.destroy(); return; }
+      if (size > MAX_BODY_BYTES) {
+        // Перестаём копить, но соединение не рвём: иначе клиент получит
+        // обрыв связи вместо внятной ошибки.
+        done = true; chunks.length = 0;
+        req.resume();
+        reject(Object.assign(new Error('too large'), { tooLarge: true }));
+        return;
+      }
       chunks.push(c);
     });
-    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-    req.on('error', reject);
+    req.on('end', () => { if (!done) resolve(Buffer.concat(chunks).toString('utf8')); });
+    req.on('error', e => { if (!done) reject(e); });
   });
 }
 
@@ -105,19 +131,32 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'GET' && req.url === '/health') { send(res, 200, { ok: true }, origin); return; }
   if (req.method !== 'POST') { send(res, 405, { error: 'Только POST' }, origin); return; }
 
-  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim()
-    || req.socket.remoteAddress || 'unknown';
+  if (!originAllowed(origin)) {
+    console.warn('Отклонён запрос с источника:', origin || '(без Origin)');
+    send(res, 403, { error: 'Источник не разрешён' }, origin);
+    return;
+  }
+
+  const ip = (TRUST_PROXY
+    ? (req.headers['x-forwarded-for'] || '').split(',')[0].trim()
+    : '') || req.socket.remoteAddress || 'unknown';
   if (rateLimited(ip)) { send(res, 429, { error: 'Слишком много запросов, подождите минуту' }, origin); return; }
 
   let body;
   try { body = JSON.parse(await readBody(req)); }
-  catch { send(res, 400, { error: 'Некорректный запрос' }, origin); return; }
+  catch (e) {
+    if (e?.tooLarge) { send(res, 413, { error: 'Запрос слишком большой' }, origin); return; }
+    send(res, 400, { error: 'Некорректный запрос' }, origin); return;
+  }
 
   const messages = sanitizeMessages(body.messages);
   if (!messages) { send(res, 400, { error: 'Нет сообщений' }, origin); return; }
 
   const model = ALLOWED_MODELS.has(body.model) ? body.model : 'claude-opus-5-5';
-  const max_tokens = Math.min(Number(body.max_tokens) || 2000, MAX_OUTPUT_TOKENS);
+  const requested = Number(body.max_tokens);
+  const max_tokens = Number.isFinite(requested) && requested > 0
+    ? Math.min(Math.max(Math.trunc(requested), 256), MAX_OUTPUT_TOKENS)
+    : 2000;
   const system = typeof body.system === 'string' ? body.system.slice(0, 20000) : undefined;
 
   try {

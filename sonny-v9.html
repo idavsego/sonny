@@ -651,9 +651,12 @@ const store={
     return null;
   },
   async set(k,v){
-    try{localStorage.setItem(k,v);return true;}catch(e){}
-    if(window.storage&&window.storage.set){try{await window.storage.set(k,v);return true;}catch(e){}}
-    return false;
+    let ok=false;
+    try{localStorage.setItem(k,v);ok=true;}catch(e){}
+    /* Внутри песочницы пишем в оба места. Иначе при очистке localStorage
+       чтение вернётся к старому снимку из песочницы и дневник откатится. */
+    if(window.storage&&window.storage.set){try{await window.storage.set(k,v);ok=true;}catch(e){}}
+    return ok;
   }
 };
 
@@ -1605,13 +1608,22 @@ function quick(el){document.getElementById('ci').value=el.textContent;sendChat()
 async function sendChat(){
   const inp=document.getElementById('ci');const text=inp.value.trim();if(!text)return;
   inp.value='';document.getElementById('chips').style.display='none';
-  addMsg(text,'user');chatHistory.push({role:'user',content:text});
+  const bubble=addMsg(text,'user');chatHistory.push({role:'user',content:text});
   const typing=addMsg('Сонни печатает…','bot');typing.classList.add('typing');
-  if(!CONFIG.CHAT_URL&&!inClaudeSandbox){
-    typing.classList.remove('typing');
-    typing.textContent='Чат пока не подключён 💛 Трекер и режим работают, а для ответов Сонни нужно указать CHAT_URL в настройках приложения.';
+  /* Отправка не удалась: снимаем вопрос и с экрана, и из истории —
+     иначе на экране висит сообщение, которого для модели уже не существует. */
+  const rollback=(note)=>{
     chatHistory.pop();
-    document.getElementById('chatlog').scrollTop=1e9;return;
+    if(bubble)bubble.remove();
+    typing.classList.remove('typing');
+    typing.textContent=note;
+    inp.value=text;
+    document.getElementById('chatlog').scrollTop=1e9;
+  };
+
+  if(!CONFIG.CHAT_URL&&!inClaudeSandbox){
+    rollback('Чат пока не подключён 💛 Трекер и режим работают, а для ответов Сонни нужно указать CHAT_URL в настройках приложения.');
+    return;
   }
   try{
     const url=CONFIG.CHAT_URL||'https://api.anthropic.com/v1/messages';
@@ -1620,17 +1632,21 @@ async function sendChat(){
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify(payload)
     });
-    if(!resp.ok)throw new Error('HTTP '+resp.status);
+    if(!resp.ok){
+      const note=resp.status===429
+        ? 'Слишком много вопросов подряд 💛 Подождите минуту и спросите снова.'
+        : 'Сонни сейчас не отвечает 💛 Попробуйте через минуту.';
+      rollback(note);return;
+    }
     const data=await resp.json();
     if(data.stop_reason==='refusal'){
-      typing.classList.remove('typing');
-      typing.textContent='На такой вопрос не отвечу 💛 Если он про здоровье малыша — лучше к педиатру.';
-      chatHistory.pop();document.getElementById('chatlog').scrollTop=1e9;return;
+      rollback('На такой вопрос не отвечу 💛 Если он про здоровье малыша — лучше к педиатру.');
+      return;
     }
     const reply=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim()||'Не получилось ответить 💛 Попробуйте ещё раз';
     typing.classList.remove('typing');typing.textContent=reply;
     chatHistory.push({role:'assistant',content:reply});
-  }catch(e){typing.classList.remove('typing');typing.textContent='Нет связи. Попробуйте ещё раз.';chatHistory.pop();}
+  }catch(e){rollback('Нет связи. Попробуйте ещё раз.');}
   document.getElementById('chatlog').scrollTop=1e9;
 }
 
